@@ -1,9 +1,15 @@
 from django.db import models
+from django.utils.text import slugify
 from accounts.models import User
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, blank=True)  # Le champ 'slug' peut être vide au début
+
+    def save(self, *args, **kwargs):
+        if not self.slug:  # Si le slug n'est pas déjà défini
+            self.slug = slugify(self.name)  # Générer un slug à partir du nom
+        super().save(*args, **kwargs)  # Appeler la méthode save du modèle parent
 
     def __str__(self):
         return self.name
@@ -23,7 +29,7 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-       # Méthode pour obtenir l'URL de l'image
+    # Méthode pour obtenir l'URL de l'image
     def get_image_url(self):
         if self.image and hasattr(self.image, 'url'):
             return self.image.url  # Utiliser l'image téléchargée
