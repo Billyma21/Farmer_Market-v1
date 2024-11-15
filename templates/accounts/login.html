@@ -1,0 +1,12 @@
+<!-- templates/accounts/login.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>Se connecter</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Se connecter</button>
+    </form>
+    <p>Pas encore de compte ? <a href="{% url 'register_farmer' %}">Inscrivez-vous comme fermier</a> ou <a href="{% url 'register_customer' %}">inscrivez-vous comme client</a>.</p>
+{% endblock %}

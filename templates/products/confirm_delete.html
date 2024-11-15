@@ -1,0 +1,9 @@
+<!-- templates/products/confirm_delete.html -->
+<h1>Confirmer la suppression du produit</h1>
+<p>Êtes-vous sûr de vouloir supprimer le produit "{{ product.name }}" ?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Supprimer</button>
+    <a href="{% url 'farmer_dashboard' %}">Annuler</a>
+</form>

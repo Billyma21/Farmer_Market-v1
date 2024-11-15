@@ -1,0 +1,12 @@
+<!-- templates/accounts/register_farmer.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>S'inscrire en tant que fermier</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">S'inscrire</button>
+    </form>
+    <p>Vous êtes déjà inscrit ? <a href="{% url 'login' %}">Connectez-vous</a>.</p>
+{% endblock %}

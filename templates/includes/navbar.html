@@ -1,0 +1,18 @@
+<!-- templates/includes/navbar.html -->
+<header>
+    <nav>
+        <ul class="nav-links">
+            <li><a href="{% url 'home' %}">Accueil</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                {% if user.is_farmer %}
+                    <li><a href="{% url 'farmer_dashboard' %}">Tableau de bord fermier</a></li>
+                {% endif %}
+            {% else %}
+                <li><a href="{% url 'login' %}">Connexion</a></li>
+                <li><a href="{% url 'register_farmer' %}">S'inscrire en tant que fermier</a></li>
+                <li><a href="{% url 'register_customer' %}">S'inscrire en tant que client</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>

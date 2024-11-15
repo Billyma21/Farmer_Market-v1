@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<h1>Tableau de bord - Fermier</h1>
+
+<!-- Barre de navigation et de filtre -->
+<div class="dashboard-header">
+    <a href="{% url 'add_product' %}" class="btn btn-primary">Ajouter un produit</a>
+
+    <!-- Filtre par catégorie -->
+    <div class="filter-container">
+        <form method="GET" class="filter-form">
+            <label for="category">Filtrer par catégorie :</label>
+            <select name="category" id="category" class="form-select" onchange="this.form.submit()">
+                <option value="">Toutes les catégories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Statistiques des produits -->
+<div class="product-summary">
+    <p><strong>Total des produits :</strong> {{ products.count }}</p>
+    <p><strong>Produits en rupture de stock :</strong> {{ out_of_stock }}</p>
+</div>
+
+<!-- Grille des produits -->
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-image">
+        <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description|truncatewords:20 }}</p>
+            <p><strong>Prix :</strong> {{ product.price }}€</p>
+            <p><strong>Stock :</strong> {{ product.stock }}</p>
+            <p><strong>Ventes :</strong> {{ product.sales_count }}</p>
+            <p><strong>Statut :</strong> {% if product.stock > 0 %}Disponible{% else %}Rupture de stock{% endif %}</p>
+            <div class="product-actions">
+                <a href="{% url 'edit_product' product.id %}" class="btn btn-secondary">Modifier</a>
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-info">Voir</a>
+                <a href="{% url 'delete_product' product.id %}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">Supprimer</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Aucun produit trouvé.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

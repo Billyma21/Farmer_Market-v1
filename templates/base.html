@@ -1,0 +1,26 @@
+<!-- templates/base.html -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Market</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+<!-- Inclure la navbar -->
+{% include 'includes/navbar.html' %}
+
+<!-- Contenu principal -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Inclure le footer -->
+{% include 'includes/footer.html' %}
+
+</body>
+</html>

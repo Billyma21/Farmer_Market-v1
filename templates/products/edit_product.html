@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Ajouter un produit</h1>
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div>
+        <label for="image">Image (ou lien d'image)</label>
+        <input type="file" name="image" accept="image/*">
+        <input type="text" name="image_url" placeholder="Ou entrez un lien d'image">
+    </div>
+    <button type="submit">Ajouter</button>
+</form>
+{% endblock %}

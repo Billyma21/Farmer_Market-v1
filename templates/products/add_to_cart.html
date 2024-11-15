@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="search-filter">
+        <form method="GET" action="{% url 'home' %}">
+            <input type="text" name="query" placeholder="Recherchez des produits..." value="{{ query }}">
+            <button type="submit">Rechercher</button>
+        </form>
+        
+        <div class="navbar-categories">
+            <ul>
+                <li><a href="?">Toutes les catégories</a></li>
+                {% for category in categories %}
+                    <li><a href="?category={{ category.slug }}" {% if selected_category == category.slug %}class="active"{% endif %}>{{ category.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <h2>Nos Produits</h2>
+    <div class="product-list">
+        <div class="products">
+            {% for product in products %}
+            <div class="product-card">
+                <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-image">
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description|truncatewords:20 }}</p>
+                    <p><strong>Prix :</strong> {{ product.price }}€</p>
+                    <p><strong>Stock :</strong> {{ product.stock }} en stock</p>
+                    <p><strong>Statut :</strong>
+                        {% if product.stock > 0 %}
+                            Disponible
+                        {% else %}
+                            Rupture de stock
+                        {% endif %}
+                    </p>
+                    <div class="product-actions">
+                        <a href="{% url 'product_detail' product.id %}" class="btn btn-info">Voir</a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">Ajouter au panier</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+                <p>Aucun produit disponible.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}
