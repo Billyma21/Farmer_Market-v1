@@ -3,6 +3,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
+
     <div class="search-filter">
         <form method="GET" action="{% url 'home' %}">
             <input type="text" name="query" placeholder="Recherchez des produits..." value="{{ query }}">

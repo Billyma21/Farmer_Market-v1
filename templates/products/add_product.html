@@ -1,5 +1,5 @@
-
 {% extends "base.html" %}
+
 {% block content %}
 <h1>Ajouter un produit</h1>
 
@@ -11,7 +11,7 @@
             <label for="name">Nom du produit</label>
             {{ form.name }}
         </div>
-        
+
         <div class="form-group">
             <label for="description">Description</label>
             {{ form.description }}
@@ -40,6 +40,18 @@
                 <input type="text" name="image_url" placeholder="Ou entrez un lien d'image" class="form-control" id="image_url">
             </div>
         </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger mt-3">
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
 
         <!-- Boutons de soumission et annulation -->
         <div class="form-group d-flex justify-content-between">
