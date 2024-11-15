@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 {% block content %}
 <h1>Ajouter un produit</h1>
@@ -5,16 +6,44 @@
 <div class="form-container">
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-
+        
         <div class="form-group">
-            <label for="image">Image (ou lien d'image)</label>
-            <input type="file" name="image" accept="image/*" class="form-control">
-            <input type="text" name="image_url" placeholder="Ou entrez un lien d'image" class="form-control">
+            <label for="name">Nom du produit</label>
+            {{ form.name }}
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Description</label>
+            {{ form.description }}
         </div>
 
         <div class="form-group">
-            <button type="submit" class="btn btn-success">Ajouter</button>
+            <label for="price">Prix</label>
+            {{ form.price }}
+        </div>
+
+        <div class="form-group">
+            <label for="category">Catégorie</label>
+            {{ form.category }}
+        </div>
+
+        <div class="form-group">
+            <label for="stock">Stock</label>
+            {{ form.stock }}
+        </div>
+
+        <!-- Champ Image avec option de lien d'image -->
+        <div class="form-group">
+            <label for="image">Image (ou lien d'image)</label>
+            <div class="d-flex">
+                <input type="file" name="image" accept="image/*" class="form-control mr-2" id="image">
+                <input type="text" name="image_url" placeholder="Ou entrez un lien d'image" class="form-control" id="image_url">
+            </div>
+        </div>
+
+        <!-- Boutons de soumission et annulation -->
+        <div class="form-group d-flex justify-content-between">
+            <button type="submit" class="btn btn-success">Ajouter le produit</button>
             <a href="{% url 'farmer_dashboard' %}" class="btn btn-danger">Annuler</a>
         </div>
     </form>

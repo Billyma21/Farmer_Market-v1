@@ -71,6 +71,36 @@ def farmer_dashboard(request):
 #         form = ProductForm()
 
 #     return render(request, 'products/add_product.html', {'form': form})
+# 
+
+
+
+# @login_required
+# def add_product(request):
+#     if not request.user.is_farmer:
+#         return redirect('home')
+
+#     if request.method == 'POST':
+#         form = ProductForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             product = form.save(commit=False)
+#             product.farmer = request.user
+
+#             # Gestion des images
+#             if 'image' in request.FILES:
+#                 product.image = request.FILES['image']  # Enregistrer l'image téléchargée
+#             elif 'image_url' in request.POST:
+#                 product.image_url = request.POST['image_url']  # Enregistrer le lien
+
+#             product.save()
+#             return redirect('farmer_dashboard')
+#     else:
+#         form = ProductForm()
+
+#     return render(request, 'products/add_product.html', {'form': form})
+
+
+
 @login_required
 def add_product(request):
     if not request.user.is_farmer:
@@ -86,7 +116,7 @@ def add_product(request):
             if 'image' in request.FILES:
                 product.image = request.FILES['image']  # Enregistrer l'image téléchargée
             elif 'image_url' in request.POST:
-                product.image_url = request.POST['image_url']  # Enregistrer le lien
+                product.image_url = request.POST['image_url']  # Enregistrer l'URL de l'image externe
 
             product.save()
             return redirect('farmer_dashboard')
@@ -94,6 +124,7 @@ def add_product(request):
         form = ProductForm()
 
     return render(request, 'products/add_product.html', {'form': form})
+
 
 # Vue pour éditer un produit existant
 @login_required

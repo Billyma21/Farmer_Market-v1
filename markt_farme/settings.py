@@ -9,6 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Dossier des fichiers médias
 MEDIA_URL = '/media/'  # URL publique pour accéder aux fichiers médias
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Dossier physique où seront stockées les images
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -90,11 +92,6 @@ DATABASES = {
 }
 
 
-# settings.py
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -132,6 +129,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+
 
 
 # Default primary key field type
