@@ -1,0 +1,126 @@
+<!-- templates/profil_farmer/farmer_dashboard.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{% static 'css/farmer_dashboard.css' %}">
+
+<h1>Tableau de bord - Fermier</h1>
+
+<!-- Menu de navigation -->
+<div class="dashboard-menu">
+    <ul>
+        <li>
+            <a href="{% url 'farmer_dashboard' %}" 
+               class="{% if request.path == '/farmer_dashboard/' %}active{% endif %}">
+                Tableau de bord
+            </a>
+        </li>
+        
+        <li>
+                Edit profile
+            </a>
+        </li>
+        
+        <li>
+            <a href="{% url 'farmer_profile' request.user.id %}" 
+               class="{% if '/farmer/profile/'|add:request.user.id in request.path %}active{% endif %}">
+                Profil fermier
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'map_view' %}" 
+               class="{% if request.path == '/map/' %}active{% endif %}">
+                Carte des fermiers
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'logout' %}" 
+               class="{% if request.path == '/logout/' %}active{% endif %}">
+                Se déconnecter
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Barre de navigation et de filtre -->
+<div class="dashboard-header">
+    <a href="{% url 'add_product' %}" class="btn btn-primary">Ajouter un produit</a>
+
+    <!-- Filtre par catégorie -->
+    <div class="filter-container">
+        <form method="GET" class="filter-form">
+            <label for="category">Filtrer par catégorie :</label>
+            <select name="category" id="category" class="form-select" onchange="this.form.submit()">
+                <option value="">Toutes les catégories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- Trier par options -->
+    <div class="filter-options">
+        <label for="sort_by">Trier par :</label>
+        <select id="sort_by" name="sort_by" onchange="this.form.submit()">
+            <option value="price" {% if selected_sort == 'price' %}selected{% endif %}>Prix</option>
+            <option value="name" {% if selected_sort == 'name' %}selected{% endif %}>Nom</option>
+            <option value="stock" {% if selected_sort == 'stock' %}selected{% endif %}>Stock</option>
+        </select>
+    </div>
+</div>
+
+<!-- Statistiques des produits -->
+<div class="product-summary">
+    <p><strong>Total des produits :</strong> {{ products.count }}</p>
+    <p><strong>Produits en rupture de stock :</strong> {{ out_of_stock }}</p>
+    <p><strong>Produits en vente :</strong> {{ products_in_sale }}</p>
+</div>
+
+<!-- Grille des produits -->
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-image">
+        <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description|truncatewords:20 }}</p>
+            <p><strong>Prix :</strong> {{ product.price }}€</p>
+            <p><strong>Stock :</strong> {{ product.stock }}</p>
+            <p><strong>Ventes :</strong> {{ product.sales_count }}</p>
+            <p><strong>Statut :</strong> {% if product.stock > 0 %}Disponible{% else %}Rupture de stock{% endif %}</p>
+            <div class="product-actions">
+                <a href="{% url 'edit_product' product.id %}" class="btn btn-secondary">Modifier</a>
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-info">Voir</a>
+                <a href="{% url 'delete_product' product.id %}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')">Supprimer</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Aucun produit trouvé.</p>
+    {% endfor %}
+</div>
+
+<!-- Pagination des produits -->
+<div class="pagination">
+    <span class="step-links">
+        {% if products.has_previous %}
+            <a href="?page=1">&laquo; Première</a>
+            <a href="?page={{ products.previous_page_number }}">Précédente</a>
+        {% endif %}
+        <span class="current">
+            Page {{ products.number }} de {{ products.paginator.num_pages }}.
+        </span>
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}">Suivante</a>
+            <a href="?page={{ products.paginator.num_pages }}">Dernière &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+
+{% endblock %}
+

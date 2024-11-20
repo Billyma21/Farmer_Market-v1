@@ -1,0 +1,26 @@
+<!-- templates/products/farmer_profile.html-->
+
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/farmer_profile.css' %}">
+
+
+
+    <h1>Profil du Fermier</h1>
+    
+    <div>
+        <p><strong>Nom : </strong>{{ farmer.username }}</p>
+        <p><strong>Email : </strong>{{ farmer.email }}</p>
+        <p><strong>Description : </strong>{{ farmer.description }}</p>
+        <p><strong>Adresse : </strong>{{ farmer.address }}</p>
+        <p><strong>Téléphone : </strong>{{ farmer.phone_number }}</p>
+        <p><strong>Site Web : </strong><a href="{{ farmer.website }}" target="_blank">{{ farmer.website }}</a></p>
+    </div>
+
+
+    <a href="{% url 'farmer_dashboard' %}" class="btn btn-secondary">Retour au tableau de bord</a>
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Modifier le profil</a>
+{% endblock %}

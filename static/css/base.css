@@ -1,0 +1,106 @@
+/* Reset de base */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif; /* Font moderne et facile à lire */
+    background-color: #f7f7f7; /* Fond doux pour ne pas fatiguer les yeux */
+    color: #333;
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+}
+
+/* Body background */
+body {
+    background-color: #f5f7fa;
+}
+
+/* Typo de base */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: #2e3a59;
+}
+
+/* Liens */
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+a:hover,
+a:focus {
+    color: #007bff;
+    transform: translateY(-3px);
+}
+
+/* Boutons */
+button, .btn {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover, .btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+button:focus, .btn:focus {
+    outline: none;
+}
+
+/* Box shadows et transitions */
+.box-shadow {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.transition {
+    transition: all 0.3s ease;
+}
+
+/* Grilles et mise en page responsive */
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.col {
+    flex: 1;
+    min-width: 280px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        width: 100%;
+        padding: 15px;
+    }
+}

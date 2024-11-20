@@ -3,6 +3,8 @@
     <nav>
         <ul class="nav-links">
             <li><a href="{% url 'home' %}">Accueil</a></li>
+            <a href="{% url 'map_view' %}">Voir la carte des fermiers</a>
+
             {% if user.is_authenticated %}
                 <li><a href="{% url 'logout' %}">Déconnexion</a></li>
                 {% if user.is_farmer %}

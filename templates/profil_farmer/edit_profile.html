@@ -1,0 +1,197 @@
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <div>
+        <label for="name">Nom de la ferme</label>
+        <input type="text" name="name" id="name" value="{{ farmer.farmer.username }}" disabled>
+    </div>
+    
+    <div>
+        <label for="description">Description</label>
+        <textarea name="description" id="description" rows="5">{{ farmer.description }}</textarea>
+    </div>
+
+    <div>
+        <label for="address">Adresse</label>
+        <input type="text" name="address" id="address" value="{{ farmer.address }}">
+    </div>
+
+    <div>
+        <label for="phone_number">Numéro de téléphone</label>
+        <input type="text" name="phone_number" id="phone_number" value="{{ farmer.phone_number }}">
+    </div>
+
+    <div>
+        <label for="agriculture_sector">Secteur Agricole</label>
+        <input type="text" name="agriculture_sector" id="agriculture_sector" value="{{ farmer.agriculture_sector }}" placeholder="Ex: Culture, Élevage, etc.">
+    </div>
+
+    <div>
+        <label for="latitude">Latitude</label>
+        <input type="text" name="latitude" id="latitude" value="{{ farmer.latitude }}">
+    </div>
+
+    <div>
+        <label for="longitude">Longitude</label>
+        <input type="text" name="longitude" id="longitude" value="{{ farmer.longitude }}">
+    </div>
+
+    <div>
+        <label for="google_maps_link">Lien Google Maps</label>
+        <input type="text" name="google_maps_link" id="google_maps_link" value="{{ farmer.google_maps_link }}" placeholder="Lien vers Google Maps">
+    </div>
+
+    <div>
+        <label for="farm_images">Image de la ferme</label>
+        <input type="file" name="farm_images" id="farm_images">
+        {% if farmer.farm_images %}
+            <img src="{{ farmer.farm_images.url }}" alt="Image de la ferme" style="max-width: 200px;">
+        {% endif %}
+    </div>
+
+    <div>
+        <label for="opening_hours">Horaires d'ouverture</label>
+        <textarea name="opening_hours" id="opening_hours">{{ farmer.opening_hours }}</textarea>
+    </div>
+
+    <div>
+        <label for="services">Services proposés</label>
+        <textarea name="services" id="services">{{ farmer.services }}</textarea>
+    </div>
+
+    <div>
+        <label for="additional_info">Informations supplémentaires</label>
+        <textarea name="additional_info" id="additional_info">{{ farmer.additional_info }}</textarea>
+    </div>
+
+    <button type="submit">Sauvegarder</button>
+</form>
+
+
+{% comment %} <!-- templates/profil_farmer/edit_profile.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Modifier votre profil</h1>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div>
+            <label for="name">Nom du produit</label>
+            <input type="text" name="name" id="name" value="{{ product.name }}" required>
+        </div>
+    
+        <div>
+            <label for="description">Description</label>
+            <textarea name="description" id="description" rows="5">{{ product.description }}</textarea>
+        </div>
+    
+        <div>
+            <label for="price">Prix</label>
+            <input type="number" name="price" id="price" value="{{ product.price }}" step="0.01" required>
+        </div>
+    
+        <div>
+            <label for="stock">Stock</label>
+            <input type="number" name="stock" id="stock" value="{{ product.stock }}" required>
+        </div>
+    
+        <div>
+            <label for="image">Image du produit</label>
+            <input type="file" name="image" id="image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="Image du produit" style="max-width: 200px;">
+            {% endif %}
+        </div>
+    
+        <div>
+            <label for="image_url">URL de l'image (optionnel)</label>
+            <input type="url" name="image_url" id="image_url" value="{{ product.image_url }}">
+        </div>
+    
+        <div>
+            <label for="category">Catégorie</label>
+            <select name="category" id="category" required>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if product.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    
+        <button type="submit">Sauvegarder</button>
+    </form>
+    
+
+    <h2>Localisez votre ferme sur la carte</h2>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+
+    <script>
+        // Initialisation de la carte Leaflet
+        var map = L.map('map').setView([{{ farmer.latitude|default:48.8566 }}, {{ farmer.longitude|default:2.3522 }}], 13);
+
+        // Chargement des tuiles OSM
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Ajout du marqueur
+        var marker = L.marker([{{ farmer.latitude|default:48.8566 }}, {{ farmer.longitude|default:2.3522 }}]).addTo(map);
+
+        // Fonction de géocodage
+        document.getElementById('searchAddress').addEventListener('click', function () {
+            var address = document.getElementById('address').value;
+            if (address) {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            var lat = data[0].lat;
+                            var lon = data[0].lon;
+
+                            // Mise à jour des champs latitude/longitude
+                            document.getElementById('latitude').value = lat;
+                            document.getElementById('longitude').value = lon;
+
+                            // Mise à jour de la carte
+                            map.setView([lat, lon], 13);
+                            marker.setLatLng([lat, lon]);
+                        } else {
+                            alert("Adresse non trouvée. Essayez d'être plus précis.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Erreur avec l’API Nominatim :', err);
+                        alert("Une erreur s'est produite lors de la recherche d'adresse.");
+                    });
+            } else {
+                alert("Veuillez entrer une adresse.");
+            }
+        });
+
+        // Détection des clics sur la carte
+        map.on('click', function (e) {
+            var lat = e.latlng.lat;
+            var lon = e.latlng.lng;
+
+            // Mise à jour des champs latitude/longitude
+            document.getElementById('latitude').value = lat;
+            document.getElementById('longitude').value = lon;
+
+            // Mise à jour du marqueur
+            marker.setLatLng([lat, lon]);
+        });
+    </script>
+
+{% endblock %} {% endcomment %}

@@ -1,0 +1,37 @@
+<!-- templates/products/map_view.html-->
+
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Carte des fermiers</h1>
+    <div id="map" style="height: 500px;"></div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialiser la carte avec un centre par défaut
+        var map = L.map('map').setView([48.8566, 2.3522], 6); // Vue initiale sur Paris
+
+        // Ajouter une couche de tuiles OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Ajouter un marqueur pour chaque fermier sur la carte
+        {% for farmer in farmers %}
+            {% if farmer.latitude and farmer.longitude %}
+                // Créer un marqueur à la latitude et longitude du fermier
+                L.marker([{{ farmer.latitude }}, {{ farmer.longitude }}])
+                    .addTo(map)
+                    .bindPopup(`
+                        <b>{{ farmer.farmer.username }}</b><br>
+                        <strong>Adresse :</strong> {{ farmer.address }}<br>
+                        <strong>Description :</strong> {{ farmer.description }}<br>
+                        <strong>Numéro de téléphone :</strong> {{ farmer.phone_number }}<br>
+                        <strong>Site Web :</strong> <a href="{{ farmer.website }}" target="_blank">{{ farmer.website }}</a><br>
+                        <strong>Services :</strong> {{ farmer.services }}<br>
+                        <strong>Horaires d'ouverture :</strong> {{ farmer.opening_hours }}
+                    `); // Afficher des infos au clic sur le marqueur
+            {% endif %}
+        {% endfor %}
+    </script>
+{% endblock %}
