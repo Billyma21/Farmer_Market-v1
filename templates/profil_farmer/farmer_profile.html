@@ -1,26 +1,45 @@
-<!-- templates/products/farmer_profile.html-->
+<!-- templates/profil_farmer/farmer_profile.html -->
 
 {% extends "base.html" %}
-
 {% load static %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/farmer_profile.css' %}">
 
+<h1>Profil du Fermier</h1>
 
+<div>
+    <p><strong>Nom : </strong>{{ farmer.farmer.username }}</p>
+    <p><strong>Email : </strong>{{ farmer.farmer.email }}</p>
+    <p><strong>Description : </strong>{{ farmer.description }}</p>
+    <p><strong>Adresse : </strong>{{ farmer.address }}</p>
+    <p><strong>Téléphone : </strong>{{ farmer.phone_number }}</p>
+    <p><strong>Site Web : </strong><a href="{{ farmer.website }}" target="_blank">{{ farmer.website }}</a></p>
+    <p><strong>Latitude : </strong>{{ farmer.latitude }}</p>
+    <p><strong>Longitude : </strong>{{ farmer.longitude }}</p>
 
-    <h1>Profil du Fermier</h1>
-    
-    <div>
-        <p><strong>Nom : </strong>{{ farmer.username }}</p>
-        <p><strong>Email : </strong>{{ farmer.email }}</p>
-        <p><strong>Description : </strong>{{ farmer.description }}</p>
-        <p><strong>Adresse : </strong>{{ farmer.address }}</p>
-        <p><strong>Téléphone : </strong>{{ farmer.phone_number }}</p>
-        <p><strong>Site Web : </strong><a href="{{ farmer.website }}" target="_blank">{{ farmer.website }}</a></p>
-    </div>
+    <!-- Affichage de la carte -->
+    <div id="map" style="height: 400px; width: 100%;"></div>
+</div>
 
+<a href="{% url 'farmer_dashboard' %}" class="btn btn-secondary">Retour au tableau de bord</a>
+<a href="{% url 'edit_profile' %}" class="btn btn-primary">Modifier le profil</a>
 
-    <a href="{% url 'farmer_dashboard' %}" class="btn btn-secondary">Retour au tableau de bord</a>
-    <a href="{% url 'edit_profile' %}" class="btn btn-primary">Modifier le profil</a>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
+<script>
+    function initMap() {
+        var location = { lat: {{ farmer.latitude }}, lng: {{ farmer.longitude }} };
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: location
+        });
+        var marker = new google.maps.Marker({
+            position: location,
+            map: map
+        });
+    }
+</script>
 {% endblock %}

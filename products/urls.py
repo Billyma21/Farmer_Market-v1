@@ -24,14 +24,14 @@ urlpatterns = [
     # path('farmer_dashboard/', views.farmer_dashboard, name='farmer_dashboard'),
     # path('farmer/profile/<int:farmer_id>/', views.farmer_profile, name='farmer_profile'),
     # path('farmer/farmer_profile/', views.edit_profile, name='farmer_profile'),
-    path('farmer/edit_profile/', views.edit_profile, name='edit_profile'),
+    path('profil_farmer/profile/<int:farmer_id>/', views.farmer_profile, name='farmer_profile'),
+    path('profil_farmer/edit_profile/', views.edit_profile, name='edit_profile'),
     
     
     # Tableau de bord du fermier
     path('farmer_dashboard/', views.farmer_dashboard, name='farmer_dashboard'),
     
     # Profil fermier (afficher le profil)
-    path('farmer/profile/<int:farmer_id>/', views.farmer_profile, name='farmer_profile'),
 
     # Modifier le profil fermier
     # path('farmer/edit_profile/', views.edit_profile, name='edit_profile'),
