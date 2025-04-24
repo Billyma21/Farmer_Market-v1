@@ -1,5 +1,7 @@
 # settings.py
 from pathlib import Path
+from dotenv import load_dotenv
+
 
 import os
 
@@ -41,11 +43,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'products',
+    'crispy_forms',
+    'crispy_bootstrap5', 
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+    'django_extensions',
 
 ]
+
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -129,8 +139,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-
-
+#stocker les fichiers " staticfiles " collectés dans un dossier spécifique
+STATIC_ROOT = BASE_DIR / "staticfiles"
+# python3 manage.py collectstatic / copie du static
+ 
 
 
 # Default primary key field type
@@ -167,3 +179,40 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Autres configurations de Django
 USE_L10N = True
 USE_TZ = True
+
+
+ # Config générals sécu https 
+ 
+# Configuration des chemins des fichiers SSL
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Rediriger tout le trafic HTTP vers HTTPS
+SECURE_SSL_REDIRECT = True 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Définir les chemins de certificat SSL
+SSL_CERTIFICATE_PATH = os.path.join(BASE_DIR, 'ssl', 'cert.pem')
+SSL_KEY_PATH = os.path.join(BASE_DIR, 'ssl', 'key.pem')
+
+# Api - openstreetmap - App OAuth2 ----> généré sur : https://www.openstreetmap.org/oauth2/applications
+
+# Charger les variables d'environnement
+from dotenv import load_dotenv
+load_dotenv()
+
+# Clé API OpenStreetMap
+# OPENSTREETMAP_OAUTH2_CLIENT_ID = os.getenv('OPENSTREETMAP_OAUTH2_CLIENT_ID')
+
+
+# Clés API OpenStreetMap
+OPENSTREETMAP_OAUTH2_CLIENT_ID = os.getenv('OPENSTREETMAP_OAUTH2_CLIENT_ID')
+OPENSTREETMAP_OAUTH2_CLIENT_SECRET = os.getenv('OPENSTREETMAP_OAUTH2_CLIENT_SECRET')
+OPENSTREETMAP_OAUTH2_REDIRECT_URI = os.getenv('OPENSTREETMAP_OAUTH2_REDIRECT_URI')
+
+# Vérification (facultatif, pour debugger)
+# print("OPENSTREETMAP_OAUTH2_CLIENT_ID:", OPENSTREETMAP_OAUTH2_CLIENT_ID)
+
+
+# OPENSTREETMAP_OAUTH2_CLIENT_ID = 'T9wg_q-Ly9Y0zrpCn7Bj-ymtz9bokzxs-irIGR7Gu7Y'
+# OPENSTREETMAP_OAUTH2_CLIENT_SECRET = '9q6OedRBdLV1THouTWONRNLiRRFQJsOSQpmTswW-RGE'
+# OPENSTREETMAP_OAUTH2_REDIRECT_URI = 'https://127.0.0.1:8000'

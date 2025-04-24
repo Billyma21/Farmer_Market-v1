@@ -1,0 +1,227 @@
+<!-- profil_farmer/preview_profile.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="preview-container">
+    <h1 class="preview-title">Aperçu de votre profil</h1>
+    
+    {% if preview %}
+      <div class="preview-content">
+        <div class="preview-section">
+          <h3>Nom de la Ferme</h3>
+          <p class="preview-item">{{ form.name.value }}</p>
+        </div>
+        
+        <div class="preview-section">
+          <h3>Adresse</h3>
+          <p class="preview-item">{{ form.address.value }}</p>
+        </div>
+        
+        <div class="preview-section">
+          <h3>Description</h3>
+          <p class="preview-item">{{ form.description.value }}</p>
+        </div>
+        
+        {% if form.latitude.value and form.longitude.value %}
+          <div class="preview-section">
+            <h3>Emplacement</h3>
+            <p class="preview-item"><strong>Latitude:</strong> {{ form.latitude.value }}</p>
+            <p class="preview-item"><strong>Longitude:</strong> {{ form.longitude.value }}</p>
+            <div id="map-preview" class="map-preview"></div>
+            <script>
+              var map = L.map('map-preview').setView([{{ form.latitude.value }}, {{ form.longitude.value }}], 13);
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              }).addTo(map);
+              L.marker([{{ form.latitude.value }}, {{ form.longitude.value }}]).addTo(map)
+                .bindPopup('Votre emplacement')
+                .openPopup();
+            </script>
+          </div>
+        {% else %}
+          <p><strong>Emplacement : non défini</strong></p>
+        {% endif %}
+        
+        {% if form.image.value %}
+          <div class="preview-section">
+            <h3>Image de la Ferme</h3>
+            <img src="{{ form.image.value.url }}" alt="Image de la ferme" class="preview-image"/>
+          </div>
+        {% endif %}
+        
+        <div class="preview-section">
+          <h3>Contact</h3>
+          <p class="preview-item">{{ form.contact.value }}</p>
+        </div>
+        
+        <div class="preview-section">
+          <h3>Catégorie</h3>
+          <p class="preview-item">{{ form.category.value }}</p>
+        </div>
+        
+        <!-- Boutons pour confirmer ou revenir à l'édition -->
+        <div class="action-buttons">
+          <form method="post" class="confirmation-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Confirmer et Enregistrer</button>
+          </form>
+          
+          <a href="{% url 'edit_profile' %}" class="btn btn-warning">Modifier</a>
+        </div>
+        
+      </div>
+    {% else %}
+      <p class="error-message">Erreur dans le formulaire d'aperçu.</p>
+    {% endif %}
+  </div>
+
+  <style>
+    .preview-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 30px;
+    }
+
+    .preview-content {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .preview-section {
+      margin-bottom: 20px;
+    }
+
+    .preview-section h3 {
+      font-size: 20px;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .preview-item {
+      font-size: 16px;
+      color: #555;
+      padding: 5px 0;
+      background-color: #fafafa;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .map-preview {
+      width: 100%;
+      height: 400px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .action-buttons .btn {
+      padding: 12px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .action-buttons .btn-success {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+    }
+
+    .action-buttons .btn-warning {
+      background-color: #FF9800;
+      color: white;
+      border: none;
+    }
+
+    .action-buttons .btn:hover {
+      opacity: 0.8;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+
+{% endblock %}
+
+
+
+
+{% comment %} <!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prévisualisation du profil fermier</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{% static 'css/profile_farmer/edit_profile.css' %}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Prévisualisation de votre profil</h1>
+
+        <div id="map" style="height: 400px;"></div>
+
+        <h2>Informations sur votre ferme</h2>
+        <p><strong>Description:</strong> {{ farmer.description }}</p>
+        <p><strong>Adresse:</strong> {{ farmer.address }}</p>
+        <p><strong>Téléphone:</strong> {{ farmer.phone_number }}</p>
+        <p><strong>Secteur agricole:</strong> {{ farmer.agriculture_sector }}</p>
+        <p><strong>Services:</strong> {{ farmer.services }}</p>
+        <p><strong>Horaires d'ouverture:</strong> {{ farmer.opening_hours }}</p>
+        <p><strong>Site web:</strong> <a href="{{ farmer.website }}" target="_blank">{{ farmer.website }}</a></p>
+        <p><strong>Informations supplémentaires:</strong> {{ farmer.additional_info }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+        </form>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialiser la carte avec les coordonnées du profil
+        var map = L.map('map').setView([{{ farmer.latitude }}, {{ farmer.longitude }}], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        var marker = L.marker([{{ farmer.latitude }}, {{ farmer.longitude }}]).addTo(map);
+        marker.bindPopup("Votre ferme ici !").openPopup();
+    </script>
+
+</body>
+</html> {% endcomment %}

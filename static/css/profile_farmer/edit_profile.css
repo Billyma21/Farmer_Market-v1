@@ -1,0 +1,148 @@
+/* Styles de base pour le formulaire de modification de profil fermier */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fc;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container principal */
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Titre de la page */
+h1 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Style des champs de formulaire */
+input.form-control, textarea.form-control, select.form-control {
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    font-size: 1rem;
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #aaa;
+}
+
+label {
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+/* Styles des boutons */
+button.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.btn-primary {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+}
+
+button.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+button.btn-success {
+    background-color: #27ae60;
+    color: #fff;
+    border: none;
+}
+
+button.btn-success:hover {
+    background-color: #2ecc71;
+}
+
+button.btn-secondary {
+    background-color: #f39c12;
+    color: #fff;
+    border: none;
+}
+
+button.btn-secondary:hover {
+    background-color: #e67e22;
+}
+
+/* Style de la carte */
+#map {
+    height: 400px;
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+/* Style de la carte */
+#map {
+    height: 400px;  /* Taille de la carte */
+    border-radius: 8px;  /* Coins arrondis */
+    width: 100%;  /* Pour s'assurer que la carte occupe toute la largeur du conteneur */
+}
+
+/* Contenu de la popup */
+.popup-content {
+    text-align: center;
+    font-size: 14px;
+}
+
+.popup-img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* Section de prévisualisation du profil */
+h2 {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    .btn {
+        font-size: 0.9rem;
+    }
+
+    #map {
+        height: 300px;
+    }
+}

@@ -1,0 +1,106 @@
+.profile-container {
+    width: 80%;
+    margin: 20px auto;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-image img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #4caf50;
+}
+
+.profile-info {
+    margin-left: 20px;
+    flex-grow: 1;
+}
+
+.profile-info h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.profile-info p {
+    margin: 5px 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.profile-info p a {
+    color: #4caf50;
+    text-decoration: none;
+}
+
+.profile-info p a:hover {
+    text-decoration: underline;
+}
+
+.edit-button {
+    margin-left: auto;
+}
+
+.edit-button .btn {
+    padding: 10px 20px;
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.edit-button .btn:hover {
+    background: #45a049;
+}
+
+.profile-details {
+    padding: 20px;
+}
+
+.profile-details h2 {
+    margin: 0 0 10px 0;
+    color: #4caf50;
+}
+
+.profile-details p {
+    margin: 5px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.profile-map {
+    padding: 20px;
+    border-top: 1px solid #eee;
+}
+
+.profile-map #map {
+    height: 400px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.popup-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.popup-content h3 {
+    margin: 0;
+    color: #4caf50;
+}

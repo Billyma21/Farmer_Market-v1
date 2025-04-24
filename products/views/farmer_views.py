@@ -8,7 +8,7 @@ from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from products.models import Product, FarmerProfile
-from products.forms import ProductForm
+from products.forms.products import ProductForm
 
 # Vue du tableau de bord du fermier
 @login_required

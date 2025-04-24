@@ -22,6 +22,8 @@
         
         <li><a href="{% url 'farmer_profile' request.user.id %}" class="{% if request.path == '/profil_farmer/profile/'|add:request.user.id %}active{% endif %}">Profil fermier</a></li>
 
+
+
         <li>
             <a href="{% url 'map_view' %}" 
                class="{% if request.path == '/map/' %}active{% endif %}">
