@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'products',
     'crispy_forms',
+    'widget_tweaks',
     'crispy_bootstrap5', 
     'rest_framework',
     'rest_framework_simplejwt',
@@ -66,6 +67,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# Paramètres CORS pour autoriser les requêtes depuis un frontend séparé
+CORS_ORIGIN_ALLOW_ALL = True  # Pour autoriser toutes les origines (attention en prod)
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

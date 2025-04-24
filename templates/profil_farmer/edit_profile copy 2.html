@@ -1,0 +1,434 @@
+<!-- templates/profil_farmer/edit_profile.html -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier le profil de la ferme</title>
+
+    <!-- Liens vers le CSS de Leaflet pour la carte -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    
+    <!-- Liens vers les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+
+    <style>
+        /* Style général de la page */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            margin: 40px auto;
+            padding: 30px;
+            max-width: 800px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: normal;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #66afe9;
+            outline: none;
+        }
+
+        .form-group button {
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-group button:hover {
+            background-color: #218838;
+        }
+
+        /* Style pour la carte */
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* Style des horaires */
+        .opening-hours-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .opening-hours-input input {
+            width: 48%;
+        }
+
+        .placeholder {
+            color: #999;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        /* Liste déroulante des adresses */
+        .autocomplete-suggestions {
+            border: 1px solid #ddd;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: white;
+            position: absolute;
+            z-index: 999;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 5px;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+        }
+
+        .autocomplete-suggestion {
+            padding: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #555;
+            transition: background-color 0.2s ease;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Animation au focus */
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #66afe9;
+        }
+
+    </style>
+
+    
+</head>
+<body>
+        
+    <div class="container">
+        <h1>Modifier votre profil de ferme</h1>
+        <form id="farmer-profile-form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <ul>
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            
+            <!-- Nom de la ferme -->
+            <div class="form-group">
+                <label for="farm_name">Nom de la ferme</label>
+                <input type="text" id="farm_name" name="farm_name" class="form-control" value="{{ farmer.farm_name }}" placeholder="Entrez le nom de la ferme" required>
+            </div>
+    
+            <!-- Adresse et géolocalisation -->
+            <div class="form-group">
+                <label for="address">Adresse</label>
+                <input type="text" id="address" name="address" class="form-control" value="{{ farmer.address }}" placeholder="Entrez une adresse" required autocomplete="off">
+                <div id="suggestions-container" class="autocomplete-suggestions"></div>
+            </div>
+    
+            <div class="form-group">
+                <label for="latitude">Latitude</label>
+                <input type="text" id="latitude" name="latitude" class="form-control" value="{{ farmer.latitude }}" readonly>
+            </div>
+    
+            <div class="form-group">
+                <label for="longitude">Longitude</label>
+                <input type="text" id="longitude" name="longitude" class="form-control" value="{{ farmer.longitude }}" readonly>
+            </div>
+    
+            <!-- Carte -->
+            <div id="map"></div>
+    
+            {% comment %} <!-- Horaires d'ouverture -->
+            <div class="form-group">
+                <label for="opening_hours">Horaires d'ouverture</label>
+                <input type="text" id="opening_hours" name="opening_hours" class="form-control" value="{{ farmer.opening_hours }}" placeholder="08:00 à 18:00" pattern="\d{2}:\d{2} à \d{2}:\d{2}" required>
+                <div class="help-text">Entrez les horaires au format 'HH:MM à HH:MM'.</div>
+            </div> {% endcomment %}
+    
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4" placeholder="Décrivez votre ferme">{{ farmer.description }}</textarea>
+            </div>
+    
+            {% comment %} <!-- Horaires d'ouverture -->
+            <div class="form-group">
+                <label for="opening_hours_start">Heure d'ouverture</label>
+                <input type="text" id="opening_hours_start" name="opening_hours_start" class="form-control" value="{{ farmer.opening_hours_start|default_if_none:'' }}" placeholder="Sélectionnez l'heure d'ouverture" required>
+
+                <label for="opening_hours_end">Heure de fermeture</label>
+                <input type="text" id="opening_hours_end" name="opening_hours_end" class="form-control" value="{{ farmer.opening_hours_end|default_if_none:'' }}" placeholder="Sélectionnez l'heure de fermeture" required>
+
+                <div class="help-text">Sélectionnez les horaires d'ouverture et de fermeture.</div>
+            </div> {% endcomment %}
+
+            <!-- Numéro de téléphone -->
+            <div class="form-group">
+                <label for="phone_number">Numéro de téléphone</label>
+                <input type="tel" id="phone_number" name="phone_number" class="form-control" value="{{ farmer.phone_number }}" placeholder="Ex: 1234567890">
+            </div>
+    
+            <!-- Secteur agricole -->
+            <div class="form-group">
+                <label for="agriculture_sector">Secteur agricole</label>
+                <input type="text" id="agriculture_sector" name="agriculture_sector" class="form-control" value="{{ farmer.agriculture_sector }}" placeholder="Ex: Culture, élevage">
+            </div>
+    
+            <!-- Services -->
+            <div class="form-group">
+                <label for="services">Services</label>
+                <textarea id="services" name="services" class="form-control" rows="3" placeholder="Ex: Produits locaux, visites">{{ farmer.services }}</textarea>
+            </div>
+    
+
+              <!-- Informations supplémentaires -->
+            <div class="form-group">
+                <label for="additional_info">Informations supplémentaires</label>
+                <textarea 
+                    id="additional_info" 
+                    name="additional_info" 
+                    class="form-control" 
+                    rows="4" 
+                    placeholder="Ajoutez des informations supplémentaires sur votre ferme">{{ farmer.additional_info }}</textarea>
+            </div>
+
+
+            <!-- Site web -->
+            <div class="form-group">
+                <label for="website">Site Web</label>
+                <input type="url" id="website" name="website" class="form-control" value="{{ farmer.website }}" placeholder="https://votresite.com">
+            </div>
+
+            
+    
+            <!-- Image de la ferme -->
+            <div class="form-group">
+                <label for="farm_images">Image de la ferme</label>
+                <input type="file" id="farm_images" name="farm_images" class="form-control">
+                {% if farmer.farm_images %}
+                    <img src="{{ farmer.farm_images.url }}" alt="Image de la ferme" class="img-thumbnail mt-3" width="150">
+                {% endif %}
+            </div>
+    
+         
+            
+            
+            <!-- Boutons -->
+            <div class="form-group">
+                <button type="button" class="btn btn-secondary" onclick="previewForm()">Prévisualiser</button>
+                <button type="submit" class="btn btn-success">Enregistrer</button>
+            </div>
+
+
+            <form id="farmer-profile-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-success">Enregistrer</button>
+            </form>
+            
+        </form>
+    </div>
+    
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+
+        // Initialisation de flatpickr pour les champs de sélection des horaires
+        document.addEventListener("DOMContentLoaded", function() {
+            flatpickr("#opening_hours_start", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                minuteIncrement: 5,  // Permet de sélectionner les minutes par incréments de 5 minutes
+            });
+            flatpickr("#opening_hours_end", {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                minuteIncrement: 5,  // Permet de sélectionner les minutes par incréments de 5 minutes
+            });
+        });
+        
+
+
+        function previewForm() {
+            const farmerId = {{ farmer.id|default:0 }};
+            if (farmerId > 0) {
+                const previewUrl = "{% url 'preview_profile' farmer.id %}";
+                window.location.href = previewUrl;
+            } else {
+                alert("Erreur : Aucun ID de fermier trouvé. Enregistrez d'abord votre profil.");
+            }
+        }
+
+
+        document.addEventListener("DOMContentLoaded", function() {
+          // Initialiser la carte et la géolocalisation
+          const defaultLat = 50.8503;
+          const defaultLon = 4.3517;
+          const map = L.map('map').setView([defaultLat, defaultLon], 13);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 19,
+          }).addTo(map);
+      
+          const marker = L.marker([defaultLat, defaultLon]).addTo(map).bindPopup("Sélectionnez une adresse").openPopup();
+      
+          // Ajouter un écouteur d'événements sur l'input d'adresse
+          document.getElementById('address').addEventListener('input', function(event) {
+            const query = event.target.value;
+            if (query.length > 2) {
+              searchAddress(query);
+            }
+          });
+      
+          // Fonction de recherche d'adresse
+          async function searchAddress(query) {
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            suggestionsContainer.innerHTML = ''; // Réinitialiser les suggestions
+            if (!query) return;
+      
+            try {
+              const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}&addressdetails=1&limit=5`);
+              if (!response.ok) throw new Error("Erreur lors de la récupération des adresses.");
+              const data = await response.json();
+      
+              if (data.length === 0) {
+                suggestionsContainer.innerHTML = '<div class="autocomplete-suggestion">Aucune correspondance trouvée</div>';
+                return;
+              }
+      
+              data.forEach(item => {
+                const suggestion = document.createElement('div');
+                suggestion.classList.add('autocomplete-suggestion');
+                suggestion.textContent = item.display_name;
+                suggestion.addEventListener('click', () => {
+                  // Remplir les champs avec les données de l'adresse sélectionnée
+                  document.getElementById('address').value = item.display_name;
+                  document.getElementById('latitude').value = item.lat;
+                  document.getElementById('longitude').value = item.lon;
+                  updateMap(item.lat, item.lon);
+                  suggestionsContainer.innerHTML = ''; // Vider les suggestions
+                });
+                suggestionsContainer.appendChild(suggestion);
+              });
+            } catch (error) {
+              console.error('Erreur API:', error);
+              suggestionsContainer.innerHTML = '<div class="autocomplete-suggestion">Erreur de chargement</div>';
+            }
+          }
+      
+          // Mettre à jour la carte avec la nouvelle adresse
+          function updateMap(lat, lon) {
+            marker.setLatLng([lat, lon]);
+            map.setView([lat, lon], 13);
+            marker.bindPopup(`Adresse sélectionnée : ${document.getElementById('address').value}`).openPopup();
+          }
+      
+          // Prévisualisation du profil
+          document.getElementById('farmer-profile-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêche l'envoi du formulaire pour le moment
+      
+            const formData = new FormData(this);
+      
+            // Envoi de la requête POST via AJAX
+            fetch("{% url 'edit_profile' %}", {
+              method: 'POST',
+              body: formData,
+              headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+              }
+            })
+            .then(response => {
+              if (response.ok) {
+                alert('Profil mis à jour avec succès!');
+                window.location.href = "{% url 'farmer_dashboard' %}"; // Redirection après succès
+              } else {
+                alert('Erreur lors de l\'enregistrement du profil.');
+              }
+            })
+            .catch(error => {
+              console.error('Erreur lors de l\'envoi du formulaire:', error);
+              alert('Erreur de connexion.');
+            });
+          });
+      
+          // Fonction pour prévisualiser l'image téléchargée
+          const imageInput = document.getElementById('profile_image');
+          const imagePreview = document.getElementById('image-preview');
+      
+          imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+      
+        });
+
+      </script>
+      
+    </body>
+    </html>

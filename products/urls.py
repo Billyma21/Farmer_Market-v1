@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
 from products import views
+from products.views import save_opening_hours
 
 
 urlpatterns = [
@@ -36,10 +37,12 @@ urlpatterns = [
     path('profil_farmer/profile/<int:farmer_id>/', views.farmer_profile, name='farmer_profile'),
     path('profil_farmer/edit_profile/', views.edit_profile, name='edit_profile'),
     path('profil_farmer/preview/<int:farmer_id>/', views.preview_profile, name='preview_profile'),
-    
+    path('save_opening_hours/', views.save_opening_hours, name='save_opening_hours'),
+
     # Tableau de bord du fermier
     path('farmer_dashboard/', views.farmer_dashboard, name='farmer_dashboard'),
-    
+    path('profil/preview/<int:farmer_id>/', views.preview_profile, name='preview_profile'),
+
     # Profil fermier (afficher le profil)
 
     # Modifier le profil fermier

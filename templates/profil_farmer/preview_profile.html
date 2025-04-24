@@ -1,4 +1,142 @@
-<!-- profil_farmer/preview_profile.html -->
+<!-- templates/profil_farmer/preview_profile.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="preview-container">
+  <h1 class="preview-title">Aperçu de votre profil</h1>
+  
+  <div class="preview-main">
+    <!-- Détails du profil à gauche -->
+    <div class="preview-left">
+      <h3>Nom</h3>
+      <p>{{ form.farm_name.value }}</p>
+      
+      <h3>Adresse</h3>
+      <p>{{ form.address.value }}</p>
+      
+      <h3>Description</h3>
+      <p>{{ form.description.value }}</p>
+      
+      <h3>Contact</h3>
+      <p>{{ form.phone_number.value }}</p>
+
+      <h3>Secteur Agricole</h3>
+      <p>{{ form.agriculture_sector.value }}</p>
+
+      <h3>Services</h3>
+      <p>{{ form.services.value }}</p>
+
+      <h3>Horaires d'ouverture</h3>
+      <p>{{ form.opening_hours.value }}</p>
+    </div>
+
+    <!-- Carte à droite -->
+    <div id="map-right" class="map-preview" style="height: 400px; width: 100%"></div>
+  </div>
+
+  <!-- Boutons de confirmation -->
+  <div class="action-buttons">
+    <form method="post" class="confirmation-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">Confirmer et Enregistrer</button>
+    </form>
+    <a href="{% url 'edit_profile' %}" class="btn btn-warning">Modifier</a>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Coordonnées à partir du profil fermier
+    const latitude = {{ form.latitude.value }};
+    const longitude = {{ form.longitude.value }};
+    
+    // Initialiser la carte
+    const map = L.map("map-right").setView([latitude, longitude], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+    
+    // Ajouter un marqueur pour la ferme
+    const marker = L.marker([latitude, longitude]).addTo(map)
+      .bindPopup("Votre ferme est ici");
+  });
+</script>
+
+{% endblock %}
+
+
+{% comment %} {% extends 'base.html' %}
+
+{% block content %}
+<div class="preview-container">
+  <h1 class="preview-title">Aperçu de votre profil</h1>
+  
+  <div class="preview-main">
+    <!-- Détails du profil à gauche -->
+    <div class="preview-left">
+      <h3>Nom de la Ferme</h3>
+      <p>{{ form.description.value }}</p>
+      
+      <h3>Adresse</h3>
+      <p>{{ form.address.value }}</p>
+      
+      <h3>Description</h3>
+      <p>{{ form.description.value }}</p>
+      
+      <h3>Contact</h3>
+      <p>{{ form.phone_number.value }}</p>
+
+      <h3>Secteur Agricole</h3>
+      <p>{{ form.agriculture_sector.value }}</p>
+
+      <h3>Services</h3>
+      <p>{{ form.services.value }}</p>
+
+      <h3>Horaires d'ouverture</h3>
+      <p>{{ form.opening_hours.value }}</p>
+    </div>
+
+    <!-- Carte à droite -->
+    <div id="map-right" class="map-preview" style="height: 400px; width: 100%"></div>
+  </div>
+
+  <!-- Boutons de confirmation -->
+  <div class="action-buttons">
+    <form method="post" class="confirmation-form">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success">Confirmer et Enregistrer</button>
+    </form>
+    <a href="{% url 'edit_profile' %}" class="btn btn-warning">Modifier</a>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Coordonnées à partir du profil fermier
+    const latitude = {{ form.latitude.value }};
+    const longitude = {{ form.longitude.value }};
+    
+    // Initialiser la carte
+    const map = L.map("map-right").setView([latitude, longitude], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+    }).addTo(map);
+    
+    // Ajouter un marqueur pour la ferme
+    const marker = L.marker([latitude, longitude]).addTo(map)
+      .bindPopup("Votre ferme est ici");
+  });
+</script>
+
+{% endblock %} {% endcomment %}
+
+
+
+{% comment %} <!-- profil_farmer/preview_profile.html -->
 {% extends 'base.html' %}
 
 {% block content %}
@@ -177,7 +315,7 @@
   </style>
 
 {% endblock %}
-
+ {% endcomment %}
 
 
 

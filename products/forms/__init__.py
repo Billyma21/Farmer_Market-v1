@@ -1,6 +1,6 @@
 # products/forms/__init__.py
 
-from .products import *
-from .farmer_profile import *
-
+from products.forms.products import *
+from products.forms.farmer_profile import *
+from products.forms.opening_hours import *
 
