@@ -49,3 +49,64 @@ class ProductForm(forms.ModelForm):
 #             raise forms.ValidationError("L'URL de l'image doit commencer par 'http://' ou 'https://'.")
 
 #         return cleaned_data
+
+class OrderForm(forms.Form):
+    shipping_address = forms.CharField(
+        label="Adresse de livraison",
+        max_length=255,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adresse complète'})
+    )
+    shipping_city = forms.CharField(
+        label="Ville",
+        max_length=100,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ville'})
+    )
+    shipping_zip_code = forms.CharField(
+        label="Code postal",
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Code postal'})
+    )
+    contact_email = forms.EmailField(
+        label="Email de contact",
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email pour le suivi de commande'})
+    )
+    contact_phone = forms.CharField(
+        label="Téléphone",
+        max_length=20,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Numéro de téléphone'})
+    )
+    notes = forms.CharField(
+        label="Notes sur la commande",
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Instructions spéciales pour la livraison ou autres informations',
+            'rows': 3
+        })
+    )
+    payment_method = forms.ChoiceField(
+        label="Méthode de paiement",
+        choices=[
+            ('stripe', 'Carte de crédit'),
+            ('paypal', 'PayPal'),
+            ('bank_transfer', 'Virement bancaire')
+        ],
+        widget=forms.RadioSelect(attrs={'class': 'form-check-input'})
+    )
+    
+    # Validations personnalisées
+    def clean_shipping_zip_code(self):
+        zip_code = self.cleaned_data.get('shipping_zip_code')
+        # Validation pour les codes postaux belges (4 chiffres)
+        if not zip_code.isdigit() or len(zip_code) != 4:
+            raise forms.ValidationError("Le code postal belge doit comporter 4 chiffres.")
+        return zip_code
+    
+    def clean_contact_phone(self):
+        phone = self.cleaned_data.get('contact_phone')
+        # Supprimer les espaces et caractères non numériques
+        phone = ''.join(c for c in phone if c.isdigit() or c in '+-')
+        # S'assurer que le numéro est valide
+        if len(phone) < 9:
+            raise forms.ValidationError("Veuillez entrer un numéro de téléphone valide.")
+        return phone
