@@ -36,6 +36,57 @@ class OrderAdmin(admin.ModelAdmin):
         }),
     )
 
+class ProductInline(admin.TabularInline):
+    model = Product
+    extra = 1
+    fields = ['name', 'category', 'price', 'stock']
+    fk_name = 'farmer'
+
+@admin.register(FarmerProfile)
+class FarmerProfileAdmin(admin.ModelAdmin):
+    list_display = ['farmer', 'address', 'phone_number', 'production_method', 'visits_allowed']
+    list_filter = ['production_method', 'visits_allowed']
+    search_fields = ['farmer__username', 'address', 'description']
+    readonly_fields = ['google_maps_link']
+    fieldsets = (
+        ('Informations de base', {
+            'fields': ('farmer', 'description', 'farm_images')
+        }),
+        ('Localisation', {
+            'fields': ('full_address', 'address', 'latitude', 'longitude', 'google_maps_link')
+        }),
+        ('Contact', {
+            'fields': ('phone_number', 'website')
+        }),
+        ('Production', {
+            'fields': ('agriculture_sector', 'production_method', 'certifications')
+        }),
+        ('Services', {
+            'fields': ('services', 'opening_hours', 'visits_allowed', 'additional_info')
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        """Géocoder l'adresse si elle est modifiée."""
+        if 'full_address' in form.changed_data and obj.full_address:
+            obj.geocode_address()
+        super().save_model(request, obj, form, change)
+
 admin.site.register(Category)
-admin.site.register(Product)
-admin.site.register(FarmerProfile)
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ['name', 'category', 'price', 'stock', 'sales_count', 'farmer']
+    list_filter = ['category', 'farmer']
+    search_fields = ['name', 'description']
+    fieldsets = (
+        ('Informations de base', {
+            'fields': ('name', 'description', 'image')
+        }),
+        ('Commerce', {
+            'fields': ('category', 'price', 'stock', 'sales_count')
+        }),
+        ('Relation', {
+            'fields': ('farmer',)
+        }),
+    )
