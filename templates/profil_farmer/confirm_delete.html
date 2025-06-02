@@ -1,0 +1,23 @@
+<!-- templates/profil_farmer/confirm_delete.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/delete_confirme.css' %}">
+
+    <div class="confirmation-container">
+        <div class="confirmation-box">
+            <h1>Confirmer la suppression</h1>
+            <p class="product-name">Êtes-vous sûr de vouloir supprimer le produit "<strong>{{ product.name }}</strong>" ?</p>
+            
+            <div class="confirmation-buttons">
+                <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+                
+                <a href="{% url 'farmer_dashboard' %}" class="btn btn-secondary">Annuler</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

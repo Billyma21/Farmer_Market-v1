@@ -3,8 +3,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-from .forms import RegisterFarmerForm, RegisterCustomerForm
-from .models import User
+from accounts.forms import RegisterFarmerForm, RegisterCustomerForm
+from accounts.models import User
 
 def login_view(request):
     if request.method == 'POST':
@@ -33,6 +33,7 @@ def register_farmer(request):
     else:
         form = RegisterFarmerForm()
     return render(request, 'accounts/register_farmer.html', {'form': form})
+
 
 def register_customer(request):
     if request.method == 'POST':

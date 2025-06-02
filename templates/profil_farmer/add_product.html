@@ -1,0 +1,176 @@
+<!-- templates/profil_farmer/add_product.html -->
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/add_product.css' %}">
+    <script src="{% static 'js/add_product.js' %}" defer></script>
+
+    <div class="container mt-5">
+        <h1>Ajouter un produit</h1>
+
+        {% if messages %}
+            <div class="alert alert-danger">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form id="productForm" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Nom du produit -->
+            <div class="form-group">
+                <label for="name">Nom du produit</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="error-message">
+                        {% for error in form.name.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label for="description">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error-message">
+                        {% for error in form.description.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Prix -->
+            <div class="form-group">
+                <label for="price">Prix</label>
+                {{ form.price }}
+                {% if form.price.errors %}
+                    <div class="error-message">
+                        {% for error in form.price.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Catégorie -->
+            <div class="form-group">
+                <label for="category">Catégorie</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="error-message">
+                        {% for error in form.category.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Stock -->
+            <div class="form-group">
+                <label for="stock">Stock</label>
+                {{ form.stock }}
+                {% if form.stock.errors %}
+                    <div class="error-message">
+                        {% for error in form.stock.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            <!-- Image -->
+            <div class="form-group">
+                <label for="image">Image (Téléchargement)</label>
+                {{ form.image }}
+                {% if form.image.errors %}
+                    <div class="error-message">
+                        {% for error in form.image.errors %}
+                            <p class="text-danger">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+                    <!-- Prévisualisation du produit -->
+            <div id="previewContainer" class="mt-4">
+                <h3>Prévisualisation de votre produit</h3>
+                <div id="productPreview">
+                    <p><strong>Nom:</strong> <span id="previewName"></span></p>
+                    <p><strong>Description:</strong> <span id="previewDescription"></span></p>
+                    <p><strong>Prix:</strong> <span id="previewPrice"></span></p>
+                    <p><strong>Catégorie:</strong> <span id="previewCategory"></span></p>
+                    <p><strong>Stock:</strong> <span id="previewStock"></span></p>
+                    <img id="previewImage" src="" width="200">
+                </div>
+            </div>
+
+            <!-- Boutons d'action -->
+            <div class="mt-4">
+                <!-- Bouton pour mettre à jour la prévisualisation -->
+                {% comment %} <button type="button" id="updatePreviewButton" class="btn btn-warning">Mettre à jour la prévisualisation</button> {% endcomment %}
+                <!-- Bouton pour soumettre le formulaire -->
+                <button type="submit" class="btn btn-primary">Ajouter le produit</button>
+                <a href="{% url 'farmer_dashboard' %}" class="btn btn-danger">Annuler</a>
+            </div>
+
+
+            <script>
+                // Fonction pour prévisualiser l'image avant l'envoi du formulaire
+                document.getElementById("id_image").addEventListener("change", function(event) {
+                    const file = event.target.files[0];
+                    const previewImage = document.getElementById("previewImage");
+                    
+                    if (file) {
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            previewImage.src = e.target.result;  // Mettre l'image en prévisualisation
+                        };
+                        
+                        reader.readAsDataURL(file);  // Lire le fichier comme une URL en base64
+                    }
+                });
+            
+                // Mettre à jour la prévisualisation des autres champs si nécessaire
+                document.getElementById("productForm").addEventListener("input", function() {
+                    document.getElementById("previewName").textContent = document.getElementById("id_name").value;
+                    document.getElementById("previewDescription").textContent = document.getElementById("id_description").value;
+                    document.getElementById("previewPrice").textContent = document.getElementById("id_price").value;
+                    document.getElementById("previewCategory").textContent = document.getElementById("id_category").options[document.getElementById("id_category").selectedIndex].text;
+                    document.getElementById("previewStock").textContent = document.getElementById("id_stock").value;
+                });
+            
+                // Bouton pour mettre à jour la prévisualisation manuellement
+                document.getElementById("updatePreviewButton").addEventListener("click", function() {
+                    document.getElementById("previewName").textContent = document.getElementById("id_name").value;
+                    document.getElementById("previewDescription").textContent = document.getElementById("id_description").value;
+                    document.getElementById("previewPrice").textContent = document.getElementById("id_price").value;
+                    document.getElementById("previewCategory").textContent = document.getElementById("id_category").options[document.getElementById("id_category").selectedIndex].text;
+                    document.getElementById("previewStock").textContent = document.getElementById("id_stock").value;
+            
+                    // Mettre à jour l'image
+                    const fileInput = document.getElementById("id_image");
+                    const previewImage = document.getElementById("previewImage");
+                    
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(e) {
+                            previewImage.src = e.target.result;  // Mettre à jour la prévisualisation de l'image
+                        };
+                        
+                        reader.readAsDataURL(file);
+                    }
+                });
+            </script>
+
+{% endblock %}
+

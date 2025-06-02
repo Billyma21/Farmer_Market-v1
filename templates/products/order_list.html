@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes Commandes | Farmer Market{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Mes Commandes</h1>
+            
+            {% if messages %}
+            <div class="messages mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if orders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Numéro de commande</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Statut</th>
+                                <th>Paiement</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'order_detail' order.id %}" class="text-decoration-none">
+                                        {{ order.id|truncatechars:10 }}
+                                    </a>
+                                </td>
+                                <td>{{ order.created_at|date:"d/m/Y à H:i" }}</td>
+                                <td>{{ order.total_price }} €</td>
+                                <td>
+                                    {% if order.status == 'created' %}
+                                        <span class="badge bg-info">{{ order.get_status_display }}</span>
+                                    {% elif order.status == 'processing' %}
+                                        <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                                    {% elif order.status == 'shipped' %}
+                                        <span class="badge bg-primary">{{ order.get_status_display }}</span>
+                                    {% elif order.status == 'delivered' %}
+                                        <span class="badge bg-success">{{ order.get_status_display }}</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if order.payment_status == 'pending' %}
+                                        <span class="badge bg-warning">{{ order.get_payment_status_display }}</span>
+                                    {% elif order.payment_status == 'completed' %}
+                                        <span class="badge bg-success">{{ order.get_payment_status_display }}</span>
+                                    {% elif order.payment_status == 'failed' %}
+                                        <span class="badge bg-danger">{{ order.get_payment_status_display }}</span>
+                                    {% elif order.payment_status == 'refunded' %}
+                                        <span class="badge bg-secondary">{{ order.get_payment_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'order_detail' order.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Détails
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <p>Vous n'avez pas encore passé de commande.</p>
+                </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="bi bi-shop"></i> Continuer mes achats
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

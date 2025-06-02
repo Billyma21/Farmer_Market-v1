@@ -1,11 +1,17 @@
+<!-- templates/profil_farmer/edit_product.html-->
+
 {% extends "base.html" %}
+{% load static %}
+
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/edit_product.css' %}">
+
 <h1>Modifier un produit</h1>
 
 <div class="form-container">
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        
+
         <!-- Champs du formulaire : Nom, Description, Prix, Catégorie, etc. -->
         <div class="form-group">
             <label for="name">Nom du produit</label>
@@ -34,19 +40,40 @@
 
         <!-- Champ Image avec option de lien d'image -->
         <div class="form-group">
-            <label for="image">Image (ou lien d'image)</label>
+            <label for="image">Image</label>
             <div class="d-flex">
                 <input type="file" name="image" accept="image/*" class="form-control mr-2" id="image">
-                <input type="text" name="image_url" placeholder="Ou entrez un lien d'image" class="form-control" id="image_url">
             </div>
         </div>
 
         <!-- Boutons de soumission et annulation -->
         <div class="form-group d-flex justify-content-between">
-            <button type="submit" class="btn btn-success">Mettre à jour</button>
+            <button type="submit" name="confirm" class="btn btn-success">Sauvegarder</button>
             <a href="{% url 'farmer_dashboard' %}" class="btn btn-danger">Annuler</a>
         </div>
     </form>
 </div>
 
+<!-- Section de prévisualisation du produit -->
+<div id="previewContainer" class="mt-4">
+    <h3>Prévisualisation actuelle de votre produit</h3>
+    <div id="currentProductPreview">
+        <p><strong>Nom:</strong> <span id="previewName">{{ product.name }}</span></p>
+        <p><strong>Description:</strong> <span id="previewDescription">{{ product.description }}</span></p>
+        <p><strong>Prix:</strong> <span id="previewPrice">{{ product.price }} €</span></p>
+        <p><strong>Catégorie:</strong> <span id="previewCategory">{{ product.category }}</span></p>
+        <p><strong>Stock:</strong> <span id="previewStock">{{ product.stock }}</span></p>
+
+        <!-- Prévisualisation de l'image -->
+        <img id="previewImage" 
+             src="{% if preview and preview.get_image_url %}{{ preview.get_image_url }}{% else %}{{ product.get_image_url }}{% endif %}" 
+             alt="Prévisualisation de l'image du produit" width="200">
+    </div>
+</div>
+
+{% block extra_js %}
+    <script src="{% static 'js/edit_product.js' %}"></script>
 {% endblock %}
+
+{% endblock %}
+

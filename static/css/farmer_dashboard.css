@@ -1,0 +1,313 @@
+/* Général */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+    overflow-x: hidden;
+}
+
+/* Palette de couleurs inspirée de l'agriculture */
+:root {
+    --primary-color: #6a994e; /* Vert agricole */
+    --secondary-color: #a8d08d; /* Vert clair */
+    --accent-color: #ff7f50; /* Orange pour accents */
+    --background-color: #f4f4f4; /* Fond léger */
+    --white: #ffffff;
+    --black: #333;
+    --border-color: #e1e1e1;
+}
+
+/* Tableau de bord */
+h1 {
+    font-size: 2rem;
+    margin: 20px;
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Menu de navigation (Fixe à gauche) */
+.dashboard-menu {
+    position: fixed;
+    top: 120px;
+    left: 0;
+    width: 250px;
+    background-color: var(--white);
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 1000;
+    height: calc(100vh - 120px);
+    overflow-y: auto; /* Ajoute un défilement si nécessaire */
+}
+
+.dashboard-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.dashboard-menu ul li {
+    margin: 15px 0;
+}
+
+.dashboard-menu ul li a {
+    text-decoration: none;
+    color: var(--black);
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: block;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.dashboard-menu ul li a:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+.dashboard-menu ul li a.active {
+    background-color: var(--accent-color);
+    color: var(--white);
+}
+
+/* Contenu du tableau de bord */
+.dashboard-header {
+    margin-left: 270px; /* Espace pour le menu à gauche */
+    padding: 20px;
+    background-color: var(--white);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-radius: 8px;
+}
+
+.dashboard-header .btn {
+    padding: 12px 20px;
+    border: none;
+    color: var(--white);
+    background-color: var(--primary-color);
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.dashboard-header .btn:hover {
+    background-color: var(--accent-color);
+}
+
+.filter-container {
+    margin-left: 20px;
+}
+
+.filter-form select,
+.filter-options select {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-left: 10px;
+    transition: border-color 0.3s ease;
+}
+
+.filter-form select:focus,
+.filter-options select:focus {
+    border-color: var(--primary-color);
+}
+
+/* Grille des produits */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+    margin-left: 270px; /* Ajout de marge à gauche pour faire de la place au menu */
+    padding: 20px;
+}
+
+.product-card {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.product-info p {
+    font-size: 1rem;
+    margin: 5px 0;
+}
+
+.product-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.product-actions .btn {
+    padding: 10px 18px;
+    font-size: 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.product-actions .btn-secondary {
+    background-color: #6c757d;
+    color: var(--white);
+}
+
+.product-actions .btn-info {
+    background-color: #17a2b8;
+    color: var(--white);
+}
+
+.product-actions .btn-danger {
+    background-color: #dc3545;
+    color: var(--white);
+}
+
+.product-actions .btn:hover {
+    opacity: 0.8;
+}
+
+/* Informations importantes (produits) */
+.product-summary {
+    margin-top: 30px;
+    background-color: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    margin-left: 270px; /* Place les informations à droite du menu */
+}
+
+.product-summary p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+/* Pagination */
+.pagination {
+    text-align: center;
+    margin-top: 30px;
+    margin-left: 270px;
+}
+
+.pagination .step-links a {
+    text-decoration: none;
+    color: var(--primary-color);
+    margin: 0 10px;
+}
+
+.pagination .current {
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+.pagination .step-links a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-menu {
+        width: 200px;
+        top: 80px;
+        left: 0;
+    }
+
+    .dashboard-header {
+        margin-left: 0;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-header .btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .filter-container {
+        width: 100%;
+        margin-left: 0;
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+    }
+
+    .filter-form select,
+    .filter-options select {
+        width: 100%;
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .product-grid {
+        grid-template-columns: 1fr 1fr;
+        margin-left: 0; /* Plus de marge à gauche */
+    }
+
+    .pagination {
+        font-size: 0.9rem;
+        margin-left: 0;
+    }
+
+    .product-summary {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+        margin-left: 0;
+    }
+
+    .dashboard-menu {
+        width: 100%;
+        top: 60px;
+        padding: 10px;
+    }
+
+    .pagination {
+        font-size: 0.8rem;
+    }
+
+    .product-summary {
+        margin-left: 0;
+    }
+}
