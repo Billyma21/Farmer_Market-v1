@@ -1,0 +1,315 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hors ligne - Farmer Market</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #388E3C;
+            --primary-light: #81C784;
+            --text-dark: #212529;
+            --text-medium: #6c757d;
+            --text-light: #adb5bd;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .offline-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 2rem;
+        }
+        
+        .offline-icon {
+            font-size: 5rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+        
+        .offline-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .offline-message {
+            font-size: 1.1rem;
+            color: var(--text-medium);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .offline-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border-radius: 25px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .cached-content {
+            margin-top: 3rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cached-content h3 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+        
+        .cached-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .cached-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .cached-link:hover {
+            background: var(--primary-light);
+            color: white;
+            text-decoration: none;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .offline-container {
+                padding: 1rem;
+            }
+            
+            .offline-title {
+                font-size: 2rem;
+            }
+            
+            .offline-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            <i class="fas fa-wifi-slash"></i>
+        </div>
+        
+        <h1 class="offline-title">Vous êtes hors ligne</h1>
+        
+        <p class="offline-message">
+            Il semble que vous n'ayez pas de connexion internet. 
+            Ne vous inquiétez pas, certaines fonctionnalités de Farmer Market 
+            sont disponibles hors ligne !
+        </p>
+        
+        <div class="offline-actions">
+            <button class="btn btn-primary" onclick="window.location.reload()">
+                <i class="fas fa-redo me-2"></i>
+                Réessayer
+            </button>
+            
+            <button class="btn btn-outline-primary" onclick="checkConnection()">
+                <i class="fas fa-wifi me-2"></i>
+                Vérifier la connexion
+            </button>
+        </div>
+        
+        <div class="cached-content">
+            <h3>
+                <i class="fas fa-download me-2"></i>
+                Contenu disponible hors ligne
+            </h3>
+            
+            <div class="cached-links">
+                <a href="/" class="cached-link">
+                    <i class="fas fa-home me-2"></i>
+                    Page d'accueil
+                </a>
+                <a href="/products/" class="cached-link">
+                    <i class="fas fa-th-large me-2"></i>
+                    Catalogue des produits
+                </a>
+                <a href="/cart/" class="cached-link">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Mon panier
+                </a>
+                <a href="/orders/" class="cached-link">
+                    <i class="fas fa-list me-2"></i>
+                    Mes commandes
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Vérifier la connexion internet
+        function checkConnection() {
+            if (navigator.onLine) {
+                window.location.reload();
+            } else {
+                showMessage('Aucune connexion internet détectée', 'warning');
+            }
+        }
+        
+        // Écouter les changements de connexion
+        window.addEventListener('online', function() {
+            showMessage('Connexion rétablie ! Rechargement de la page...', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        });
+        
+        window.addEventListener('offline', function() {
+            showMessage('Connexion perdue', 'warning');
+        });
+        
+        // Afficher des messages
+        function showMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${getIcon(type)} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        
+        function getIcon(type) {
+            const icons = {
+                success: 'check-circle',
+                warning: 'exclamation-triangle',
+                error: 'exclamation-circle',
+                info: 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+        
+        // Vérifier périodiquement la connexion
+        setInterval(checkConnection, 10000);
+        
+        // Gestion des erreurs de navigation
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                showMessage('Cette page n\'est pas disponible hors ligne', 'warning');
+            }
+        });
+        
+        // Intercepter les clics sur les liens
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'A' && !navigator.onLine) {
+                const href = e.target.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                    // Vérifier si la page est en cache
+                    caches.match(href).then(response => {
+                        if (response) {
+                            // La page est en cache, navigation normale
+                            return;
+                        } else {
+                            e.preventDefault();
+                            showMessage('Cette page n\'est pas disponible hors ligne', 'warning');
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

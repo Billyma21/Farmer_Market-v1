@@ -1,4 +1,302 @@
 <!-- templates/includes/footer.html -->
+{% load i18n %}
+
 <footer>
-    <p>&copy; 2024 Farmer Market</p>
+    <div class="footer-container">
+        <div class="footer-section">
+            <h3>{% trans 'Farmer Market' %}</h3>
+            <p class="footer-description">
+                {% trans 'Connecter directement les agriculteurs locaux et les consommateurs pour favoriser une alimentation durable et soutenir l\'économie locale.' %}
+            </p>
+            <div class="footer-social">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h3>{% trans 'Liens rapides' %}</h3>
+            <div class="footer-links">
+                <a href="{% url 'home' %}">{% trans 'Accueil' %}</a>
+                <a href="{% url 'map_view' %}">{% trans 'Carte des fermiers' %}</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'my_orders' %}">{% trans 'Mes commandes' %}</a>
+                    <a href="{% url 'view_cart' %}">{% trans 'Mon panier' %}</a>
+                {% else %}
+                    <a href="{% url 'login' %}">{% trans 'Se connecter' %}</a>
+                    <a href="{% url 'register_customer' %}">{% trans 'S\'inscrire' %}</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h3>{% trans 'Pour les fermiers' %}</h3>
+            <div class="footer-links">
+                {% if user.is_authenticated and user.is_farmer %}
+                    <a href="{% url 'farmer_dashboard' %}">{% trans 'Tableau de bord' %}</a>
+                    <a href="{% url 'add_product' %}">{% trans 'Ajouter un produit' %}</a>
+                    <a href="{% url 'edit_profile' %}">{% trans 'Gérer mon profil' %}</a>
+                {% else %}
+                    <a href="{% url 'register_farmer' %}">{% trans 'Devenir fermier partenaire' %}</a>
+                    <a href="#">{% trans 'Avantages pour les fermiers' %}</a>
+                    <a href="#">{% trans 'Comment ça marche' %}</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="footer-section">
+            <h3>{% trans 'Contact' %}</h3>
+            <address class="footer-contact">
+                <p><i class="fas fa-map-marker-alt"></i> 123 {% trans 'Rue de la Ferme' %}, 1000 Bruxelles</p>
+                <p><i class="fas fa-phone"></i> +32 123 456 789</p>
+                <p><i class="fas fa-envelope"></i> contact@farmermarket.be</p>
+            </address>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <p>&copy; {% now "Y" %} {% trans 'Farmer Market' %}. {% trans 'Tous droits réservés.' %}</p>
+            <div class="footer-legal">
+                <a href="#">{% trans 'Mentions légales' %}</a>
+                <a href="#">{% trans 'Politique de confidentialité' %}</a>
+                <a href="#">{% trans 'Conditions d\'utilisation' %}</a>
+            </div>
+        </div>
+    </div>
 </footer>
+
+<style>
+    /* Variables CSS pour la cohérence */
+    :root {
+        --primary-color: #28a745;
+        --primary-dark: #218838;
+        --text-dark: #1a1a1a;
+        --text-light: #ffffff;
+        --text-muted: #bbbbbb;
+        --text-muted-dark: #999999;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+        --transition: all 0.3s ease;
+    }
+
+    /* Styles spécifiques au footer avec meilleure lisibilité */
+    footer {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: var(--text-light);
+        padding-top: 60px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .footer-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 30px;
+    }
+    
+    .footer-section {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    .footer-section h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        position: relative;
+        color: var(--text-light);
+        letter-spacing: 0.5px;
+    }
+    
+    .footer-section h3::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        border-radius: 2px;
+    }
+    
+    .footer-description {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        line-height: 1.6;
+        font-weight: 400;
+    }
+    
+    .footer-links {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .footer-links a {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 500;
+        transition: var(--transition);
+        text-decoration: none;
+        padding: 5px 0;
+        border-radius: 5px;
+        padding-left: 5px;
+    }
+    
+    .footer-links a:hover {
+        color: var(--primary-color);
+        background-color: rgba(40, 167, 69, 0.1);
+        transform: translateX(5px);
+    }
+    
+    .footer-social {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .footer-social a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transition: var(--transition);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .footer-social a:hover {
+        background-color: var(--primary-color);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-light);
+    }
+    
+    .footer-social a i {
+        font-size: 1.1rem;
+        color: var(--text-light);
+    }
+    
+    .footer-contact p {
+        margin-bottom: 12px;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    
+    .footer-contact p i {
+        margin-right: 12px;
+        color: var(--primary-color);
+        width: 18px;
+        font-size: 1rem;
+    }
+    
+    .footer-bottom {
+        margin-top: 40px;
+        padding: 25px 0;
+        border-top: 1px solid var(--border-color);
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-muted-dark);
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .footer-bottom .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .footer-bottom p {
+        font-weight: 500;
+        margin: 0;
+    }
+    
+    .footer-legal {
+        display: flex;
+        gap: 25px;
+        flex-wrap: wrap;
+    }
+    
+    .footer-legal a {
+        color: var(--text-muted-dark);
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    
+    .footer-legal a:hover {
+        color: var(--primary-color);
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    
+    /* Responsive design amélioré */
+    @media (max-width: 768px) {
+        .footer-container {
+            flex-direction: column;
+            gap: 40px;
+            padding: 0 15px;
+        }
+        
+        .footer-bottom .container {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+        
+        .footer-section {
+            width: 100%;
+        }
+        
+        .footer-section h3 {
+            font-size: 1.2rem;
+        }
+        
+        .footer-description {
+            font-size: 0.9rem;
+        }
+        
+        .footer-links a {
+            font-size: 0.9rem;
+        }
+        
+        .footer-contact p {
+            font-size: 0.9rem;
+        }
+        
+        .footer-legal {
+            justify-content: center;
+            gap: 20px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .footer-social {
+            justify-content: center;
+        }
+        
+        .footer-legal {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>

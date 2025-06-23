@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rapport de ventes - {{ date_from|date:"d/m/Y" }} au {{ date_to|date:"d/m/Y" }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .summary-item {
+            flex: 1;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 0 10px;
+            text-align: center;
+        }
+        .summary-item h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .summary-item p {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0 0;
+        }
+        .sales-value { color: #4CAF50; }
+        .orders-value { color: #2196F3; }
+        .products-value { color: #FF9800; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f2f2f2;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: white;
+        }
+        .status-completed { background-color: #4CAF50; }
+        .status-processing { background-color: #FF9800; }
+        .status-cancelled { background-color: #F44336; }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Rapport de ventes</h1>
+    <p>Période : du {{ date_from|date:"d/m/Y" }} au {{ date_to|date:"d/m/Y" }}</p>
+    {% if product %}
+    <p>Produit : {{ product.name }}</p>
+    {% endif %}
+    
+    <div class="summary">
+        <div class="summary-item">
+            <h3>Chiffre d'affaires</h3>
+            <p class="sales-value">{{ total_sales|floatformat:2 }} €</p>
+        </div>
+        <div class="summary-item">
+            <h3>Commandes</h3>
+            <p class="orders-value">{{ total_orders }}</p>
+        </div>
+        <div class="summary-item">
+            <h3>Produits vendus</h3>
+            <p class="products-value">{{ total_products }}</p>
+        </div>
+    </div>
+    
+    {% if orders %}
+    <h2>Détails des ventes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Commande</th>
+                <th>Date</th>
+                <th>Client</th>
+                <th>Produits</th>
+                <th>Montant</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                <td>{{ order.customer.username }}</td>
+                <td>{{ order.get_product_count }}</td>
+                <td>{{ order.total_amount|floatformat:2 }} €</td>
+                <td>
+                    <span class="status status-{{ order.status }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p><em>Aucune vente trouvée pour la période sélectionnée.</em></p>
+    {% endif %}
+    
+    <div class="footer">
+        <p>Rapport généré le {{ now|date:"d/m/Y H:i" }}</p>
+        <p>Farmer Market - Tous droits réservés</p>
+    </div>
+</body>
+</html> 

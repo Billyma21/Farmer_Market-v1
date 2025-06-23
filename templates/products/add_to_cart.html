@@ -38,7 +38,7 @@
                     <div class="product-actions">
                         <a href="{% url 'product_detail' product.id %}" class="btn btn-info">Voir</a>
                         {% if user.is_authenticated %}
-                            <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">Ajouter au panier</a>
+                            <a href="{% url 'add_to_cart_with_id' product.id %}" class="btn btn-primary">Ajouter au panier</a>
                         {% endif %}
                     </div>
                 </div>

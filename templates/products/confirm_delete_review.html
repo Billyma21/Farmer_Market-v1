@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container confirm-delete-container">
+    <div class="confirm-delete-box">
+        <div class="confirm-header">
+            <i class="fas fa-exclamation-triangle warning-icon"></i>
+            <h1>Confirmer la suppression</h1>
+        </div>
+        
+        <div class="confirm-content">
+            <p>Êtes-vous sûr de vouloir supprimer votre avis sur <strong>{{ review.product.name }}</strong> ?</p>
+            
+            <div class="review-summary">
+                <div class="rating-display">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= review.rating %}
+                            <span class="star filled">★</span>
+                        {% else %}
+                            <span class="star">☆</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <h3>{{ review.title }}</h3>
+                <div class="review-comment">
+                    {{ review.comment }}
+                </div>
+                <div class="review-date">
+                    Publié le {{ review.created_at|date:"d/m/Y" }}
+                </div>
+            </div>
+            
+            <div class="warning-text">
+                <p><strong>Attention:</strong> Cette action est irréversible. Votre avis sera définitivement supprimé.</p>
+            </div>
+            
+            <div class="confirm-actions">
+                <form method="post" action="{% url 'delete_review' review.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Oui, supprimer cet avis</button>
+                </form>
+                <a href="{% url 'product_detail' review.product.id %}" class="btn btn-outline-secondary">Non, annuler</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

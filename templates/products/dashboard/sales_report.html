@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Rapport de ventes{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-success mb-4">Rapport de ventes</h1>
+            
+            <!-- Filtres -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">Date de début</label>
+                            <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">Date de fin</label>
+                            <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="product" class="form-label">Produit</label>
+                            <select class="form-select" id="product" name="product">
+                                <option value="">Tous les produits</option>
+                                {% for p in products %}
+                                <option value="{{ p.id }}" {% if product_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-12 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Filtrer</button>
+                            <a href="{% url 'sales_report' %}" class="btn btn-outline-secondary ms-2">Réinitialiser</a>
+                            <a href="{% url 'sales_report_pdf' %}?date_from={{ date_from|date:'Y-m-d' }}&date_to={{ date_to|date:'Y-m-d' }}{% if product_id %}&product={{ product_id }}{% endif %}" class="btn btn-success ms-2">
+                                <i class="fas fa-file-pdf"></i> Exporter en PDF
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Résumé -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Chiffre d'affaires</h5>
+                            <h2 class="text-success">{{ total_sales|floatformat:2 }} €</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Nombre de commandes</h5>
+                            <h2 class="text-primary">{{ total_orders }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light shadow-sm h-100">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Produits vendus</h5>
+                            <h2 class="text-info">{{ total_products }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Graphique -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Évolution des ventes</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="salesChart" height="300"></canvas>
+                </div>
+            </div>
+            
+            <!-- Tableau des ventes -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">Détails des ventes</h5>
+                </div>
+                <div class="card-body">
+                    {% if orders %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Commande</th>
+                                    <th>Date</th>
+                                    <th>Client</th>
+                                    <th>Produits</th>
+                                    <th>Montant</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                                    <td>{{ order.customer.username }}</td>
+                                    <td>{{ order.get_product_count }}</td>
+                                    <td>{{ order.total_amount|floatformat:2 }} €</td>
+                                    <td>
+                                        <span class="badge {% if order.status == 'completed' %}bg-success{% elif order.status == 'processing' %}bg-warning{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        Aucune vente trouvée pour la période sélectionnée.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Données pour le graphique
+    const salesData = JSON.parse('{{ sales_data|safe }}');
+    
+    // Créer le graphique
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: salesData.labels,
+            datasets: [{
+                label: 'Ventes (€)',
+                data: salesData.values,
+                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                borderColor: 'rgba(76, 175, 80, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(76, 175, 80, 1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' €';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + ' €';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

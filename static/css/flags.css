@@ -1,0 +1,93 @@
+/* Flags CSS - Optimisé pour les performances */
+
+/* Sprite CSS pour les drapeaux */
+.flag-icon {
+    display: inline-block;
+    width: 24px;
+    height: 18px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.flag-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+/* Drapeau français */
+.flag-icon-fr {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Crect width='1' height='2' fill='%2300247E'/%3E%3Crect x='1' width='1' height='2' fill='white'/%3E%3Crect x='2' width='1' height='2' fill='%23ED2939'/%3E%3C/svg%3E");
+}
+
+/* Drapeau anglais (Royaume-Uni) */
+.flag-icon-gb {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3CclipPath id='a'%3E%3Cpath d='M30 15h30v15zv15H0zH0V0zV0h30z'/%3E%3C/clipPath%3E%3CclipPath id='b'%3E%3Cpath d='M30 15h30v15zv15H0zH0V0zV0h30z'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23a)'%3E%3Cpath d='M0 0v30h60V0z' fill='%23012169'/%3E%3Cpath d='M0 0L60 30m0-30L0 30' stroke='white' stroke-width='6'/%3E%3Cpath d='M0 0L60 30m0-30L0 30' clip-path='url(%23b)' stroke='%23C8102E' stroke-width='4'/%3E%3Cpath d='M30 0v30M0 15h60' stroke='white' stroke-width='10'/%3E%3Cpath d='M30 0v30M0 15h60' stroke='%23C8102E' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Drapeau néerlandais */
+.flag-icon-nl {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 9 6'%3E%3Crect width='9' height='2' fill='%23AE1C28'/%3E%3Crect y='2' width='9' height='2' fill='white'/%3E%3Crect y='4' width='9' height='2' fill='%2321468B'/%3E%3C/svg%3E");
+}
+
+/* Variantes pour différentes tailles */
+.flag-icon-sm {
+    width: 16px;
+    height: 12px;
+}
+
+.flag-icon-lg {
+    width: 32px;
+    height: 24px;
+}
+
+.flag-icon-xl {
+    width: 48px;
+    height: 36px;
+}
+
+/* Animation pour le changement de langue */
+.language-option.loading .flag-icon {
+    animation: flagShake 0.5s ease-in-out;
+}
+
+@keyframes flagShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Style pour les drapeaux dans les dropdowns */
+.language-dropdown .flag-icon {
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+/* Style pour les drapeaux dans la navbar */
+.language-toggle .flag-icon {
+    margin-right: 4px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .flag-icon {
+        width: 20px;
+        height: 15px;
+    }
+    
+    .language-toggle .flag-icon {
+        margin-right: 0;
+    }
+}
+
+/* Support pour les préférences de réduction de mouvement */
+@media (prefers-reduced-motion: reduce) {
+    .flag-icon,
+    .language-option.loading .flag-icon {
+        animation: none;
+        transition: none;
+    }
+} 

@@ -1,0 +1,618 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Finaliser ma commande - Farmer Market{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .checkout-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .checkout-header h1 {
+        color: #333;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .checkout-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin-bottom: 3rem;
+    }
+    
+    .checkout-steps::before {
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 10%;
+        right: 10%;
+        height: 4px;
+        background: #e0e0e0;
+        z-index: -1;
+    }
+    
+    .checkout-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 33.333%;
+    }
+    
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .step-title {
+        font-weight: 600;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .step-active .step-number {
+        background: #61892F;
+    }
+    
+    .step-active .step-title {
+        color: #333;
+    }
+    
+    .step-completed .step-number {
+        background: #86C232;
+    }
+    
+    .step-completed .step-number::after {
+        content: '✓';
+        font-size: 1.4rem;
+    }
+    
+    .checkout-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    .checkout-form {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 2rem;
+    }
+    
+    .checkout-summary {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 2rem;
+        position: sticky;
+        top: 20px;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+    
+    .form-title {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: #61892F;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(97, 137, 47, 0.1);
+    }
+    
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .summary-title {
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
+    
+    .summary-items {
+        margin-bottom: 1.5rem;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .item-info {
+        flex: 1;
+    }
+    
+    .item-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .item-price {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .item-quantity {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .item-total {
+        font-weight: 600;
+        color: #61892F;
+    }
+    
+    .summary-totals {
+        margin-bottom: 1.5rem;
+    }
+    
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .total-label {
+        color: #666;
+    }
+    
+    .total-value {
+        font-weight: 600;
+    }
+    
+    .total-final {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #61892F;
+    }
+    
+    .checkout-actions {
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: #61892F;
+        color: white;
+        border: none;
+        width: 100%;
+    }
+    
+    .btn-primary:hover {
+        background: #507526;
+    }
+    
+    .btn-outline {
+        background: transparent;
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    
+    .btn-outline:hover {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .payment-options {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .payment-option {
+        flex: 1;
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .payment-option.active {
+        border-color: #61892F;
+        background: rgba(97, 137, 47, 0.05);
+    }
+    
+    .payment-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: #666;
+    }
+    
+    .payment-option.active .payment-icon {
+        color: #61892F;
+    }
+    
+    .payment-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .payment-description {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .security-badges {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    .security-badge {
+        display: flex;
+        align-items: center;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .security-badge i {
+        font-size: 1.2rem;
+        margin-right: 0.5rem;
+        color: #61892F;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .checkout-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1>Finaliser ma commande</h1>
+        
+        <div class="checkout-steps">
+            <div class="checkout-step step-completed">
+                <div class="step-number">1</div>
+                <div class="step-title">Panier</div>
+            </div>
+            <div class="checkout-step step-active">
+                <div class="step-number">2</div>
+                <div class="step-title">Informations de retrait</div>
+            </div>
+            <div class="checkout-step">
+                <div class="step-number">3</div>
+                <div class="step-title">Paiement</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="checkout-content">
+        <div class="checkout-form">
+            <form method="post" id="checkout-form">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h2 class="form-title">Informations de retrait</h2>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.pickup_date.id_for_label }}">Date de retrait</label>
+                            {{ form.pickup_date.as_widget|safe|cut:"id="|cut:form.pickup_date.id_for_label|add:"id=pickup-date class=form-control" }}
+                            {% if form.pickup_date.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.pickup_date.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.pickup_time_slot.id_for_label }}">Créneau horaire</label>
+                            {{ form.pickup_time_slot.as_widget|safe|cut:"id="|cut:form.pickup_time_slot.id_for_label|add:"id=pickup-time class=form-control" }}
+                            {% if form.pickup_time_slot.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.pickup_time_slot.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.notes.id_for_label }}">Instructions spéciales (optionnel)</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.notes.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                </div>
+                
+                <div class="form-section">
+                    <h2 class="form-title">Mode de paiement</h2>
+                    
+                    <div class="payment-options">
+                        <div class="payment-option active" data-payment="onsite">
+                            <div class="payment-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <h3 class="payment-title">Sur place</h3>
+                            <p class="payment-description">Payez lors du retrait de votre commande</p>
+                            <input type="radio" name="payment_method" value="onsite" checked style="display: none;">
+                        </div>
+                        
+                        <div class="payment-option" data-payment="card">
+                            <div class="payment-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <h3 class="payment-title">Carte bancaire</h3>
+                            <p class="payment-description">Paiement sécurisé en ligne</p>
+                            <input type="radio" name="payment_method" value="card" style="display: none;">
+                        </div>
+                        
+                        <div class="payment-option" data-payment="transfer">
+                            <div class="payment-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <h3 class="payment-title">Virement</h3>
+                            <p class="payment-description">Paiement par virement bancaire</p>
+                            <input type="radio" name="payment_method" value="transfer" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div id="payment-details-card" class="payment-details" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="card-number">Numéro de carte</label>
+                                <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="card-name">Nom sur la carte</label>
+                                <input type="text" id="card-name" class="form-control" placeholder="John Doe">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="card-expiry">Date d'expiration</label>
+                                <input type="text" id="card-expiry" class="form-control" placeholder="MM/AA">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="card-cvc">CVC</label>
+                                <input type="text" id="card-cvc" class="form-control" placeholder="123">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="payment-details-transfer" class="payment-details" style="display: none;">
+                        <div class="form-group">
+                            <p>Vous recevrez les informations de virement par email après validation de votre commande.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <div class="form-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="terms-checkbox" required>
+                            <span class="checkbox-text">J'accepte les <a href="#" target="_blank">conditions générales de vente</a> et la <a href="#" target="_blank">politique de confidentialité</a></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="checkout-actions">
+                    <a href="{% url 'view_cart' %}" class="btn btn-outline">Retour au panier</a>
+                    <button type="submit" class="btn btn-primary">Confirmer ma commande</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="checkout-summary">
+            <h2 class="summary-title">Récapitulatif de commande</h2>
+            
+            <div class="summary-items">
+                {% for item in cart.items.all %}
+                <div class="summary-item">
+                    <div class="item-info">
+                        <div class="item-name">{{ item.product.name }}</div>
+                        <div class="item-price">{{ item.product.price }} € x {{ item.quantity }}</div>
+                    </div>
+                    <div class="item-total">{{ item.get_total }} €</div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="summary-totals">
+                <div class="total-row">
+                    <div class="total-label">Sous-total</div>
+                    <div class="total-value">{{ cart.get_total }} €</div>
+                </div>
+                
+                <div class="total-row">
+                    <div class="total-label">Frais de service</div>
+                    <div class="total-value">0,00 €</div>
+                </div>
+                
+                <div class="total-row">
+                    <div class="total-label total-final">Total</div>
+                    <div class="total-value total-final">{{ cart.get_total }} €</div>
+                </div>
+            </div>
+            
+            <div class="order-receipt">
+                <p class="receipt-info">
+                    <i class="fas fa-file-invoice"></i> Un bon de commande détaillé vous sera envoyé par email
+                </p>
+            </div>
+            
+            <div class="security-badges">
+                <div class="security-badge">
+                    <i class="fas fa-lock"></i>
+                    <span>Paiement sécurisé</span>
+                </div>
+                <div class="security-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Transaction protégée</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion des options de paiement
+        const paymentOptions = document.querySelectorAll('.payment-option');
+        const paymentDetailsCard = document.getElementById('payment-details-card');
+        const paymentDetailsTransfer = document.getElementById('payment-details-transfer');
+        const paymentInputs = document.querySelectorAll('input[name="payment_method"]');
+        
+        paymentOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Réinitialiser toutes les options
+                paymentOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // Activer l'option sélectionnée
+                this.classList.add('active');
+                
+                // Cocher la radio correspondante
+                const paymentMethod = this.dataset.payment;
+                document.querySelector(`input[value="${paymentMethod}"]`).checked = true;
+                
+                // Afficher/masquer les détails de paiement
+                if (paymentMethod === 'card') {
+                    paymentDetailsCard.style.display = 'block';
+                    paymentDetailsTransfer.style.display = 'none';
+                } else if (paymentMethod === 'transfer') {
+                    paymentDetailsCard.style.display = 'none';
+                    paymentDetailsTransfer.style.display = 'block';
+                } else {
+                    paymentDetailsCard.style.display = 'none';
+                    paymentDetailsTransfer.style.display = 'none';
+                }
+            });
+        });
+        
+        // Validation du formulaire
+        const checkoutForm = document.getElementById('checkout-form');
+        const termsCheckbox = document.getElementById('terms-checkbox');
+        
+        checkoutForm.addEventListener('submit', function(e) {
+            if (!termsCheckbox.checked) {
+                e.preventDefault();
+                alert('Veuillez accepter les conditions générales de vente pour continuer.');
+                return false;
+            }
+            
+            // Vérifier le paiement par virement
+            const selectedPayment = document.querySelector('input[name="payment_method"]:checked').value;
+            if (selectedPayment === 'card') {
+                const cardNumber = document.getElementById('card-number').value;
+                const cardName = document.getElementById('card-name').value;
+                const cardExpiry = document.getElementById('card-expiry').value;
+                const cardCvc = document.getElementById('card-cvc').value;
+                
+                if (!cardNumber || !cardName || !cardExpiry || !cardCvc) {
+                    e.preventDefault();
+                    alert('Veuillez remplir tous les champs de paiement par carte.');
+                    return false;
+                }
+            }
+            
+            // Si c'est un virement, nous ne faisons rien de plus ici
+            // Générer et afficher un message de confirmation pour le virement
+            if (selectedPayment === 'transfer') {
+                alert("Paiement par virement sélectionné. Vous recevrez les instructions par email.");
+            }
+            
+            // Générer et afficher un message de confirmation pour la commande
+            const orderNumber = Math.floor(100000 + Math.random() * 900000);
+            localStorage.setItem('lastOrderNumber', orderNumber);
+        });
+    });
+    
+</script>
+{% endblock %} 

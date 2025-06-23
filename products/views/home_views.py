@@ -3,13 +3,26 @@
 # products/views/client_views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Prefetch, Count, Avg
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from products.models import Product, Category
+from products.models.models import Review
+from django.views.decorators.vary import vary_on_cookie
 
-# Vue de la page d'accueil, qui affiche tous les produits et catégories
-def home(request):
+
+# Logique principale partagée pour récupérer les produits et catégories
+def _get_home_page_data(request):
+    """Logique pour récupérer les produits et catégories."""
     categories = Category.objects.all()
-    products = Product.objects.all()
+    
+    # Optimisation des requêtes avec select_related et prefetch_related
+    products = Product.objects.select_related('category', 'farmer').prefetch_related(
+        Prefetch('reviews', queryset=Review.objects.only('rating'), to_attr='prefetched_reviews')
+    ).annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews')
+    )
 
     # Filtrage par catégorie
     selected_category = request.GET.get('category')
@@ -21,17 +34,49 @@ def home(request):
     if query:
         products = products.filter(Q(name__icontains=query) | Q(description__icontains=query))
 
-    return render(request, 'products/home.html', {
-        'products': products,
+    return {
         'categories': categories,
+        'products': products,
         'selected_category': selected_category,
         'query': query
-    })
+    }
+
+@cache_page(60 * 15)  # Cache de 15 minutes pour les utilisateurs anonymes
+def home_anonymous(request):
+    """Page d'accueil avec cache pour les utilisateurs anonymes."""
+    context = _get_home_page_data(request)
+    return render(request, 'products/home.html', context)
+
+
+@vary_on_cookie  # Cache différencié en fonction de l'authentification de l'utilisateur
+def home(request):
+    """Page d'accueil avec cache pour les utilisateurs anonymes et mise à jour pour les utilisateurs connectés."""
+    if request.user.is_authenticated:
+        # Si l'utilisateur est connecté, on ne met pas en cache la page. Elle est mise à jour à chaque requête.
+        context = _get_home_page_data(request)
+        return render(request, 'products/home.html', context)
+    else:
+        # Si l'utilisateur n'est pas connecté, la page est mise en cache pour 15 minutes.
+        return home_anonymous(request)
 
 # Vue des détails d'un produit
 def product_detail(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    return render(request, 'products/product_detail.html', {'product': product})
+    # Optimisation avec select_related et prefetch_related
+    product = get_object_or_404(
+        Product.objects.select_related('category', 'farmer')
+        .prefetch_related(
+            Prefetch('reviews', queryset=Review.objects.select_related('user'))
+        ),
+        id=product_id
+    )
+    
+    # Récupérer les produits similaires de la même catégorie
+    similar_products = Product.objects.filter(category=product.category).exclude(id=product.id)[:4]
+    
+    return render(request, 'products/product_detail.html', {
+        'product': product, 
+        'similar_products': similar_products
+    })
 
 # Vue pour ajouter un produit au panier
 def add_to_cart(request, product_id):

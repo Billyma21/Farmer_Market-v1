@@ -1,0 +1,88 @@
+# Farmer Market - Requirements
+# Version Beta - Épreuve Intégrée
+
+# Django et Framework Web
+Django==5.1.3
+djangorestframework==3.15.2
+django-cors-headers==4.4.0
+django-filter==24.1
+django-widget-tweaks==1.5.0
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+
+# Authentification et Sécurité
+djangorestframework-simplejwt==5.3.1
+django-allauth==0.60.1
+
+# Base de données
+psycopg2-binary==2.9.9
+
+# Cache et Tâches Asynchrones
+redis==5.0.1
+celery==5.3.4
+
+# Paiements
+stripe==7.8.0
+
+# Génération de PDF
+pdfkit==1.0.0
+
+# Gestion des fichiers statiques
+whitenoise==6.9.0
+
+# Utilitaires
+python-decouple==3.8
+Pillow==10.2.0
+requests==2.31.0
+
+# Tests et Qualité
+coverage==7.4.1
+pytest==7.4.3
+pytest-django==4.7.0
+
+# Développement
+django-debug-toolbar==4.2.0
+django-extensions==3.2.3
+
+# Production
+gunicorn==21.2.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Development & Testing
+amqp==5.3.1
+asgiref==3.8.1
+billiard==4.2.1
+Brotli==1.1.0
+certifi==2024.8.30
+cffi==1.17.1
+chardet==5.2.0
+charset-normalizer==3.4.0
+click==8.1.8
+click-didyoumean==0.3.1
+click-plugins==1.1.1
+click-repl==0.3.0
+cryptography==43.0.3
+cssselect2==0.8.0
+pycparser==2.22
+pydyf==0.11.0
+PyJWT==2.9.0
+pyOpenSSL==24.2.1
+pyphen==0.17.2
+python-dateutil==2.9.0.post0
+reportlab==4.3.1
+requests-oauthlib==2.0.0
+six==1.17.0
+sqlparse==0.5.2
+tinycss2==1.4.0
+tinyhtml5==2.0.0
+typing_extensions==4.13.2
+tzdata==2025.2
+urllib3==2.2.3
+vine==5.1.0
+wcwidth==0.2.13
+weasyprint==65.1
+webencodings==0.5.1
+Werkzeug==3.1.3
+zopfli==0.2.3.post1

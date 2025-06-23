@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ajouter un avis - {{ product.name }} - Farmer Market{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .review-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .review-header {
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .review-product {
+        display: flex;
+        align-items: center;
+        background: #f9f9f9;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-right: 1rem;
+    }
+    
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .product-info h3 {
+        margin: 0 0 0.5rem 0;
+        color: #333;
+    }
+    
+    .review-form-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        padding: 2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+    }
+    
+    textarea.form-control {
+        min-height: 150px;
+        resize: vertical;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .star-rating {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .stars {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: center;
+    }
+    
+    .stars input {
+        display: none;
+    }
+    
+    .stars label {
+        cursor: pointer;
+        font-size: 2.5rem;
+        padding: 0 5px;
+        color: #ddd;
+        transition: all 0.2s ease;
+    }
+    
+    .stars label:hover,
+    .stars label:hover ~ label,
+    .stars input:checked ~ label {
+        color: #FDA33C;
+    }
+    
+    .rating-text {
+        margin-top: 0.5rem;
+        font-weight: 600;
+        min-height: 24px;
+    }
+    
+    .review-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background: #61892F;
+        color: white;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: #507526;
+    }
+    
+    .btn-outline-secondary {
+        background: transparent;
+        color: #6c757d;
+        border: 1px solid #6c757d;
+    }
+    
+    .btn-outline-secondary:hover {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .rating-helper {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-container">
+    <div class="review-header">
+        <h1>Donner mon avis</h1>
+        <p>Partagez votre expérience avec ce produit</p>
+    </div>
+    
+    <div class="review-product">
+        <div class="product-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}">
+            {% endif %}
+        </div>
+        <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p>Produit par {{ product.farmer.user.username }}</p>
+        </div>
+    </div>
+    
+    <div class="review-form-container">
+        <form method="post" action="{% url 'add_review' product.id %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Votre note</label>
+                <div class="star-rating">
+                    <div class="stars">
+                        <input type="radio" id="star5" name="rating" value="5" {% if form.rating.value == 5 %}checked{% endif %}>
+                        <label for="star5" title="5 étoiles"><i class="far fa-star"></i></label>
+                        
+                        <input type="radio" id="star4" name="rating" value="4" {% if form.rating.value == 4 %}checked{% endif %}>
+                        <label for="star4" title="4 étoiles"><i class="far fa-star"></i></label>
+                        
+                        <input type="radio" id="star3" name="rating" value="3" {% if form.rating.value == 3 %}checked{% endif %}>
+                        <label for="star3" title="3 étoiles"><i class="far fa-star"></i></label>
+                        
+                        <input type="radio" id="star2" name="rating" value="2" {% if form.rating.value == 2 %}checked{% endif %}>
+                        <label for="star2" title="2 étoiles"><i class="far fa-star"></i></label>
+                        
+                        <input type="radio" id="star1" name="rating" value="1" {% if form.rating.value == 1 %}checked{% endif %}>
+                        <label for="star1" title="1 étoile"><i class="far fa-star"></i></label>
+                    </div>
+                    <div class="rating-text" id="rating-text"></div>
+                    {% if form.rating.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.rating.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Titre de votre avis</label>
+                {{ form.title.as_widget|safe|cut:"id="|cut:form.title.id_for_label|add:"id=review-title class=form-control" }}
+                {% if form.title.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.title.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.comment.id_for_label }}">Votre commentaire</label>
+                {{ form.comment.as_widget|safe|cut:"id="|cut:form.comment.id_for_label|add:"id=review-comment class=form-control" }}
+                {% if form.comment.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.comment.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="review-actions">
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-secondary">Annuler</a>
+                <button type="submit" class="btn btn-primary">Publier mon avis</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.stars input');
+        const ratingText = document.getElementById('rating-text');
+        const ratingTexts = {
+            1: 'Très déçu',
+            2: 'Déçu',
+            3: 'Correct',
+            4: 'Satisfait',
+            5: 'Très satisfait'
+        };
+        
+        // Initialiser le texte d'évaluation
+        for (const star of stars) {
+            if (star.checked) {
+                ratingText.textContent = ratingTexts[star.value];
+                break;
+            }
+        }
+        
+        // Mettre à jour le texte d'évaluation lors de la sélection
+        for (const star of stars) {
+            star.addEventListener('change', function() {
+                ratingText.textContent = ratingTexts[this.value];
+            });
+        }
+        
+        // Changer les étoiles de outline à solid quand sélectionnées
+        const starLabels = document.querySelectorAll('.stars label');
+        
+        stars.forEach((star, index) => {
+            star.addEventListener('change', function() {
+                // Réinitialiser toutes les étoiles
+                starLabels.forEach(label => {
+                    label.innerHTML = '<i class="far fa-star"></i>';
+                });
+                
+                // Mettre à jour les étoiles sélectionnées
+                const selectedRating = parseInt(this.value);
+                for (let i = 0; i < 5; i++) {
+                    if (i < selectedRating) {
+                        starLabels[4-i].innerHTML = '<i class="fas fa-star"></i>';
+                    }
+                }
+            });
+        });
+        
+        // Initialiser les icônes d'étoiles
+        const checkedStar = document.querySelector('.stars input:checked');
+        if (checkedStar) {
+            const selectedRating = parseInt(checkedStar.value);
+            for (let i = 0; i < 5; i++) {
+                if (i < selectedRating) {
+                    starLabels[4-i].innerHTML = '<i class="fas fa-star"></i>';
+                }
+            }
+        }
+    });
+</script>
+{% endblock %} 

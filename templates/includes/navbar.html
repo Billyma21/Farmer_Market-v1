@@ -1,20 +1,1052 @@
-<!-- templates/includes/navbar.html -->
-<header>
-    <nav>
-        <ul class="nav-links">
-            <li><a href="{% url 'home' %}">Accueil</a></li>
-            <a href="{% url 'map_view' %}">Voir la carte des fermiers</a>
+{% load i18n %}
+{% load static %}
 
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}">Déconnexion</a></li>
-                {% if user.is_farmer %}
-                    <li><a href="{% url 'farmer_dashboard' %}">Tableau de bord fermier</a></li>
+<!-- Navbar Professionnelle Farmer Market -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top" id="mainNavbar">
+    <div class="navbar-container">
+        <!-- Logo et Brand -->
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+            <div class="brand-icon me-2">
+                <i class="fas fa-leaf"></i>
+            </div>
+            <div class="brand-text">
+                <span class="brand-name">{% trans "Farmer Market" %}</span>
+                <span class="brand-tagline">{% trans "Produits Locaux" %}</span>
+            </div>
+        </a>
+
+        <!-- Bouton toggle mobile -->
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <!-- Barre de recherche centrée -->
+            <div class="search-container mx-auto">
+                <form class="search-form" action="{% url 'product_list' %}" method="GET">
+                    <div class="search-input-group">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="form-control search-input" name="q" 
+                               placeholder="{% trans 'Rechercher des produits...' %}" 
+                               value="{{ request.GET.q }}" aria-label="Rechercher">
+                        <button class="btn search-btn" type="submit" aria-label="Rechercher">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+            </div>
+
+            <!-- Navigation droite -->
+            <ul class="navbar-nav ms-auto align-items-center">
+                <!-- Navigation principale -->
+                <li class="nav-item d-none d-lg-block me-3">
+                    <a class="nav-link nav-link-main {% if request.resolver_match.url_name == 'map_view' %}active{% endif %}" href="{% url 'map_view' %}">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>{% trans 'Carte' %}</span>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-lg-block me-3">
+                    <a class="nav-link nav-link-main {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                        <i class="fas fa-home"></i>
+                        <span>{% trans 'Accueil' %}</span>
+                    </a>
+                </li>
+                <li class="nav-item d-none d-lg-block me-3">
+                    <a class="nav-link nav-link-main {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'product_list' %}">
+                        <i class="fas fa-shopping-basket"></i>
+                        <span>{% trans 'Produits' %}</span>
+                    </a>
+                </li>
+
+                <!-- Sélecteur de langue professionnel -->
+                <li class="nav-item dropdown language-selector me-3">
+                    <a class="nav-link dropdown-toggle language-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="language-flag">
+                            {% if LANGUAGE_CODE == 'fr' %}
+                                <span class="flag-icon flag-icon-fr"></span>
+                            {% elif LANGUAGE_CODE == 'en' %}
+                                <span class="flag-icon flag-icon-gb"></span>
+                            {% elif LANGUAGE_CODE == 'nl' %}
+                                <span class="flag-icon flag-icon-nl"></span>
+                            {% endif %}
+                        </div>
+                        <span class="language-text d-none d-sm-inline">{{ LANGUAGE_CODE|upper }}</span>
+                        <i class="fas fa-chevron-down language-arrow"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end language-dropdown">
+                        <li class="dropdown-header">
+                            <i class="fas fa-globe me-2"></i>{% trans 'Choisir la langue' %}
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item language-option" href="#" data-lang="fr">
+                                <span class="flag-icon flag-icon-fr me-2"></span>
+                                <span class="language-name">Français</span>
+                                {% if LANGUAGE_CODE == 'fr' %}<i class="fas fa-check text-success ms-auto"></i>{% endif %}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item language-option" href="#" data-lang="en">
+                                <span class="flag-icon flag-icon-gb me-2"></span>
+                                <span class="language-name">English</span>
+                                {% if LANGUAGE_CODE == 'en' %}<i class="fas fa-check text-success ms-auto"></i>{% endif %}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item language-option" href="#" data-lang="nl">
+                                <span class="flag-icon flag-icon-nl me-2"></span>
+                                <span class="language-name">Nederlands</span>
+                                {% if LANGUAGE_CODE == 'nl' %}<i class="fas fa-check text-success ms-auto"></i>{% endif %}
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                {% if user.is_authenticated %}
+                    <!-- Panier avec compteur -->
+                    <li class="nav-item me-3">
+                        <a class="nav-link cart-link" href="{% url 'view_cart' %}" aria-label="{% trans 'Panier' %}">
+                            <div class="cart-icon-container">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-count" id="cart-count">0</span>
+                            </div>
+                        </a>
+                    </li>
+
+                    <!-- Menu utilisateur -->
+                    <li class="nav-item dropdown user-menu">
+                        <a class="nav-link dropdown-toggle user-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-avatar">
+                                {% if user.profile.avatar %}
+                                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="avatar-img">
+                                {% else %}
+                                    <div class="avatar-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                    {% endif %}
+                            </div>
+                            <div class="user-info d-none d-lg-block">
+                                <span class="user-name">{{ user.username }}</span>
+                                <span class="user-role">
+                                    {% if user.is_farmer %}{% trans 'Fermier' %}{% else %}{% trans 'Client' %}{% endif %}
+                                </span>
+                            </div>
+                            <i class="fas fa-chevron-down user-arrow"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                            <li class="dropdown-header">
+                                <i class="fas fa-user-circle me-2"></i>{% trans 'Mon Compte' %}
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            {% if user.is_farmer %}
+                                <!-- Menu Fermier -->
+                                <li><a class="dropdown-item" href="{% url 'farmer_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt me-2"></i> {% trans 'Tableau de bord' %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'manage_products' %}">
+                                    <i class="fas fa-box me-2"></i> {% trans 'Mes produits' %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'manage_orders' %}">
+                                    <i class="fas fa-clipboard-list me-2"></i> {% trans 'Mes commandes' %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'sales_report' %}">
+                                    <i class="fas fa-chart-line me-2"></i> {% trans 'Rapport de ventes' %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'manage_time_slots' %}">
+                                    <i class="fas fa-clock me-2"></i> {% trans 'Créneaux horaires' %}
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            {% else %}
+                                <!-- Menu Client -->
+                            <li><a class="dropdown-item" href="{% url 'customer_dashboard' %}">
+                                    <i class="fas fa-tachometer-alt me-2"></i> {% trans 'Tableau de bord' %}
+                                </a></li>
+                                <li><a class="dropdown-item" href="{% url 'my_orders' %}">
+                                    <i class="fas fa-shopping-bag me-2"></i> {% trans 'Mes commandes' %}
+                            </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            
+                            <!-- Actions communes -->
+                            <li><a class="dropdown-item" href="{% url 'edit_profile' %}">
+                                <i class="fas fa-user-edit me-2"></i> {% trans 'Modifier mon profil' %}
+                            </a></li>
+                            {% if user.is_farmer %}
+                            <li><a class="dropdown-item" href="{% url 'farmer_profile' user.id %}">
+                                <i class="fas fa-id-card me-2"></i> {% trans 'Mon profil public' %}
+                            </a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="dropdown-item p-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-link text-danger p-2 w-100 text-start logout-btn">
+                                        <i class="fas fa-sign-out-alt me-2"></i> {% trans 'Se déconnecter' %}
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Menu mobile pour navigation principale -->
+                    <div class="mobile-nav d-lg-none w-100 mt-3">
+                        <hr class="mobile-divider">
+                        <div class="mobile-nav-grid">
+                            <a class="mobile-nav-item {% if request.resolver_match.url_name == 'map_view' %}active{% endif %}" href="{% url 'map_view' %}">
+                                <i class="fas fa-map-marked-alt"></i>
+                                <span>{% trans 'Carte' %}</span>
+                            </a>
+                            <a class="mobile-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">
+                                <i class="fas fa-home"></i>
+                                <span>{% trans 'Accueil' %}</span>
+                            </a>
+                            <a class="mobile-nav-item {% if request.resolver_match.url_name == 'product_list' %}active{% endif %}" href="{% url 'product_list' %}">
+                                <i class="fas fa-shopping-basket"></i>
+                                <span>{% trans 'Produits' %}</span>
+                            </a>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- Menu utilisateur non connecté -->
+                    <li class="nav-item me-2">
+                        <a class="nav-link btn btn-outline-primary login-btn" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span class="d-none d-md-inline">{% trans 'Connexion' %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link btn btn-success register-btn" href="{% url 'register_customer' %}">
+                            <i class="fas fa-user"></i>
+                            <span class="d-none d-md-inline">{% trans 'Devenir Client' %}</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-warning partner-btn" href="{% url 'register_farmer' %}">
+                            <i class="fas fa-tractor"></i>
+                            <span class="d-none d-md-inline">{% trans 'Devenir Partenaire' %}</span>
+                        </a>
+                    </li>
                 {% endif %}
-            {% else %}
-                <li><a href="{% url 'login' %}">Connexion</a></li>
-                <li><a href="{% url 'register_farmer' %}">S'inscrire en tant que fermier</a></li>
-                <li><a href="{% url 'register_customer' %}">S'inscrire en tant que client</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</header>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- CSS pour la navbar professionnelle -->
+<style>
+/* Variables CSS */
+:root {
+    --primary-color: #28a745;
+    --primary-dark: #218838;
+    --secondary-color: #ffc107;
+    --text-dark: #1a1a1a;
+    --text-medium: #333333;
+    --text-muted: #666666;
+    --border-color: #e9ecef;
+    --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-medium: 0 5px 20px rgba(0,0,0,0.15);
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    --border-radius: 10px;
+    --border-radius-lg: 15px;
+}
+
+/* Navbar principale */
+.navbar {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-bottom: 2px solid var(--border-color);
+    transition: all var(--transition-medium);
+    z-index: 1030;
+    padding: 1rem 0;
+    min-height: 80px;
+}
+
+.navbar.scrolled {
+    background: rgba(255, 255, 255, 1) !important;
+    box-shadow: var(--shadow-medium);
+}
+
+/* Brand/Logo */
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    text-decoration: none;
+    transition: transform var(--transition-fast);
+    margin-right: 2rem;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.brand-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.brand-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.brand-tagline {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Bouton toggle mobile */
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.navbar-toggler:hover {
+    background-color: rgba(40, 167, 69, 0.2);
+}
+
+/* Barre de recherche */
+.search-container {
+    max-width: 500px;
+    width: 100%;
+    margin: 0 2rem;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-light);
+}
+
+.search-input-group:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    z-index: 2;
+}
+
+.search-input {
+    border: none;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    background: transparent;
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.search-input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0 25px 25px 0;
+    transition: all var(--transition-fast);
+}
+
+.search-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+}
+
+/* Navigation links */
+.nav-link-main {
+    color: var(--text-dark) !important;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.25rem;
+}
+
+.nav-link-main:hover {
+    color: var(--primary-color) !important;
+    background-color: rgba(40, 167, 69, 0.1);
+    transform: translateY(-2px);
+}
+
+.nav-link-main.active {
+    color: var(--primary-color) !important;
+    background-color: rgba(40, 167, 69, 0.15);
+}
+
+/* Sélecteur de langue */
+.language-selector {
+    margin: 0;
+}
+
+.language-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem !important;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    color: var(--text-dark) !important;
+    text-decoration: none;
+    background: rgba(40, 167, 69, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.language-toggle:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color);
+}
+
+.language-flag {
+    width: 24px;
+    height: 18px;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.language-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+}
+
+.language-arrow {
+    font-size: 0.8rem;
+    transition: transform var(--transition-fast);
+    color: var(--text-muted);
+}
+
+.language-toggle[aria-expanded="true"] .language-arrow {
+    transform: rotate(180deg);
+}
+
+.language-dropdown {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-medium);
+    padding: 0.5rem 0;
+    min-width: 200px;
+    animation: dropdownFadeIn 0.2s ease;
+    background: white;
+}
+
+.dropdown-header {
+    font-weight: 600;
+    color: var(--text-dark);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    transition: all var(--transition-fast);
+    color: var(--text-dark);
+    text-decoration: none;
+}
+
+.language-option:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.language-name {
+    flex: 1;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+/* Panier */
+.cart-link {
+    padding: 0.5rem !important;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+}
+
+.cart-link:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    transform: translateY(-2px);
+}
+
+.cart-icon-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+    border: 2px solid var(--border-color);
+    color: var(--text-dark);
+}
+
+.cart-link:hover .cart-icon-container {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.cart-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--secondary-color);
+    color: var(--text-dark);
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    animation: cartPulse 2s infinite;
+    border: 2px solid white;
+}
+
+/* Menu utilisateur */
+.user-menu {
+    margin-left: 0;
+}
+
+.user-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-fast);
+    color: var(--text-dark) !important;
+    text-decoration: none;
+    background: rgba(40, 167, 69, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.user-toggle:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color);
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+    transition: all var(--transition-fast);
+}
+
+.user-toggle:hover .user-avatar {
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--text-muted);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+}
+
+.user-role {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-arrow {
+    font-size: 0.8rem;
+    transition: transform var(--transition-fast);
+    color: var(--text-muted);
+}
+
+.user-toggle[aria-expanded="true"] .user-arrow {
+    transform: rotate(180deg);
+}
+
+.user-dropdown {
+    border: none;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-medium);
+    padding: 0.5rem 0;
+    min-width: 250px;
+    animation: dropdownFadeIn 0.2s ease;
+    background: white;
+}
+
+.user-dropdown .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    transition: all var(--transition-fast);
+    color: var(--text-dark);
+    text-decoration: none;
+}
+
+.user-dropdown .dropdown-item:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--primary-color);
+    transform: translateX(5px);
+}
+
+.logout-btn {
+    color: #dc3545 !important;
+    transition: all var(--transition-fast);
+}
+
+.logout-btn:hover {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+/* Boutons d'inscription */
+.login-btn, .register-btn, .partner-btn {
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    transition: all var(--transition-fast);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.25rem;
+}
+
+.login-btn {
+    background: transparent;
+    color: var(--primary-color) !important;
+    border: 2px solid var(--primary-color);
+}
+
+.login-btn:hover {
+    background: var(--primary-color);
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+.register-btn {
+    background: var(--primary-color);
+    color: white !important;
+    border: 2px solid var(--primary-color);
+}
+
+.register-btn:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: white !important;
+    transform: translateY(-2px);
+}
+
+.partner-btn {
+    background: var(--secondary-color);
+    color: var(--text-dark) !important;
+    border: 2px solid var(--secondary-color);
+}
+
+.partner-btn:hover {
+    background: #e0a800;
+    border-color: #e0a800;
+    color: var(--text-dark) !important;
+    transform: translateY(-2px);
+}
+
+/* Menu mobile */
+.mobile-nav {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-medium);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.mobile-divider {
+    margin: 0.5rem 0;
+    border-color: var(--border-color);
+}
+
+.mobile-nav-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    color: var(--text-dark);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+    background: rgba(40, 167, 69, 0.05);
+    border: 1px solid var(--border-color);
+}
+
+.mobile-nav-item:hover {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--primary-color);
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+}
+
+.mobile-nav-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.mobile-nav-item span {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Animations */
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes cartPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .search-container {
+        max-width: none;
+        margin: 1rem 0;
+    }
+    
+    .navbar-nav {
+        align-items: stretch;
+    }
+    
+    .language-selector {
+        margin: 0;
+    }
+    
+    .user-menu {
+        margin-left: 0;
+    }
+    
+    .navbar {
+        padding: 0.75rem 0;
+        min-height: auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .brand-tagline {
+        display: none;
+    }
+    
+    .language-text {
+        display: none !important;
+    }
+    
+    .user-info {
+        display: none !important;
+    }
+    
+    .login-btn span, .register-btn span, .partner-btn span {
+        display: none;
+    }
+    
+    .mobile-nav-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .navbar-brand {
+        margin-right: 1rem;
+    }
+    
+    .brand-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 1.1rem;
+    }
+    
+    .brand-name {
+        font-size: 1.2rem;
+    }
+}
+
+/* Support pour les préférences de réduction de mouvement */
+@media (prefers-reduced-motion: reduce) {
+    .navbar *,
+    .dropdown-item,
+    .search-btn,
+    .login-btn,
+    .register-btn,
+    .partner-btn {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+</style>
+
+<!-- JavaScript pour la navbar -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Gestion du scroll pour la navbar
+    const navbar = document.getElementById('mainNavbar');
+    let lastScrollTop = 0;
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+        
+        lastScrollTop = scrollTop;
+    }, { passive: true });
+
+    // Gestion du changement de langue
+    const languageOptions = document.querySelectorAll('.language-option');
+    languageOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.preventDefault();
+            const lang = this.getAttribute('data-lang');
+            const currentPath = window.location.pathname + window.location.search;
+            
+            // Afficher un indicateur de chargement
+            this.classList.add('loading');
+            const originalContent = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Changement...';
+            
+            // Obtenir le token CSRF
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                             document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+            
+            // Appel AJAX pour changer la langue
+            fetch('/api/set-language/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    language: lang,
+                    next: currentPath
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Mettre à jour l'affichage de la langue
+                    updateLanguageDisplay(lang);
+                    
+                    // Afficher un message de succès
+                    showToast('Langue changée avec succès', 'success');
+                    
+                    // Recharger la page pour appliquer les changements
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    console.error('Erreur lors du changement de langue:', data.error);
+                    showToast('Erreur lors du changement de langue: ' + data.error, 'error');
+                    // Restaurer l'option
+                    this.classList.remove('loading');
+                    this.innerHTML = originalContent;
+                }
+            })
+            .catch(error => {
+                console.error('Erreur réseau:', error);
+                showToast('Erreur de connexion lors du changement de langue', 'error');
+                // Restaurer l'option en cas d'erreur
+                this.classList.remove('loading');
+                this.innerHTML = originalContent;
+            });
+        });
+    });
+
+    // Fonction pour mettre à jour l'affichage de la langue
+    function updateLanguageDisplay(langCode) {
+        const languageToggle = document.querySelector('.language-toggle');
+        const flagContainer = languageToggle.querySelector('.language-flag');
+        const textContainer = languageToggle.querySelector('.language-text');
+        
+        // Mettre à jour le drapeau
+        flagContainer.innerHTML = `<span class="flag-icon flag-icon-${langCode}"></span>`;
+        
+        // Mettre à jour le texte
+        if (textContainer) {
+            textContainer.textContent = langCode.toUpperCase();
+        }
+        
+        // Mettre à jour les icônes de sélection
+        document.querySelectorAll('.language-option .fas.fa-check').forEach(icon => {
+            icon.style.display = 'none';
+        });
+        
+        const selectedOption = document.querySelector(`[data-lang="${langCode}"]`);
+        if (selectedOption) {
+            const checkIcon = selectedOption.querySelector('.fas.fa-check');
+            if (checkIcon) {
+                checkIcon.style.display = 'inline-block';
+            }
+        }
+    }
+
+    // Fonction pour afficher des notifications toast
+    function showToast(message, type = 'info') {
+        // Créer l'élément toast
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-notification-${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Ajouter au body
+        document.body.appendChild(toast);
+        
+        // Afficher avec animation
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Masquer après 3 secondes
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    // Mise à jour du compteur de panier
+    {% if user.is_authenticated %}
+        function updateCartCount() {
+        fetch('{% url "cart_count" %}', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Cache-Control': 'no-cache'
+            }
+        })
+                .then(response => response.json())
+                .then(data => {
+                    const cartCountElement = document.getElementById('cart-count');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = data.count;
+                cartCountElement.style.display = data.count > 0 ? 'flex' : 'none';
+                
+                // Animation si le nombre a changé
+                        if (data.count > 0) {
+                    cartCountElement.style.animation = 'none';
+                    cartCountElement.offsetHeight; // Trigger reflow
+                    cartCountElement.style.animation = 'cartPulse 0.3s ease-out';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating cart count:', error);
+        });
+    }
+    
+    // Mise à jour initiale et périodique
+        updateCartCount();
+    setInterval(updateCartCount, 60000); // Mise à jour toutes les minutes
+    
+    // Mise à jour lors du focus de la fenêtre
+    window.addEventListener('focus', updateCartCount);
+    {% endif %}
+    });
+</script>

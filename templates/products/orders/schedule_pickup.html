@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Planifier le retrait de votre commande{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">Planifier le retrait de votre commande #{{ order.id }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5>Récapitulatif de votre commande</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Date de commande:</strong> {{ order.created_at|date:"d/m/Y" }}</p>
+                                <p><strong>Montant total:</strong> {{ order.total_amount }} €</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Statut:</strong> 
+                                    <span class="badge 
+                                        {% if order.status == 'pending' %}bg-warning
+                                        {% elif order.status == 'confirmed' %}bg-info
+                                        {% elif order.status == 'ready' %}bg-success
+                                        {% elif order.status == 'completed' %}bg-primary
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Veuillez choisir un créneau horaire et une date pour le retrait de votre commande.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.availability_slot.id_for_label }}" class="form-label">Créneau horaire</label>
+                            {{ form.availability_slot }}
+                            {% if form.availability_slot.errors %}
+                                <div class="invalid-feedback d-block">{{ form.availability_slot.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.pickup_date.id_for_label }}" class="form-label">Date de retrait</label>
+                            {{ form.pickup_date }}
+                            <small class="form-text text-muted">Choisissez une date qui correspond au jour du créneau sélectionné.</small>
+                            {% if form.pickup_date.errors %}
+                                <div class="invalid-feedback d-block">{{ form.pickup_date.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check"></i> Confirmer le rendez-vous
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const slotSelect = document.getElementById('{{ form.availability_slot.id_for_label }}');
+        const dateInput = document.getElementById('{{ form.pickup_date.id_for_label }}');
+        
+        // Ajouter des classes Bootstrap
+        slotSelect.classList.add('form-select');
+        dateInput.classList.add('form-control');
+        
+        // Mise à jour du jour de la semaine correspondant au créneau sélectionné
+        slotSelect.addEventListener('change', function() {
+            const selectedOption = slotSelect.options[slotSelect.selectedIndex];
+            if (selectedOption.value) {
+                const weekday = selectedOption.text.split(' ')[0]; // Extraire le jour de la semaine
+                document.querySelector('small.form-text').textContent = 
+                    `Choisissez une date pour un ${weekday.toLowerCase()}.`;
+            }
+        });
+        
+        // Déclencher l'événement au chargement
+        if (slotSelect.selectedIndex > 0) {
+            slotSelect.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %} 

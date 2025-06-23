@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container confirm-cancel-container">
+    <div class="confirm-cancel-box">
+        <div class="confirm-header">
+            <i class="fas fa-exclamation-triangle warning-icon"></i>
+            <h1>Confirmer l'annulation</h1>
+        </div>
+        
+        <div class="confirm-content">
+            <p>Êtes-vous sûr de vouloir annuler la commande #{{ order.id }} ?</p>
+            
+            <div class="order-summary">
+                <div class="summary-row">
+                    <span class="label">Date de commande:</span>
+                    <span class="value">{{ order.created_at|date:"d/m/Y à H:i" }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Date de retrait prévue:</span>
+                    <span class="value">{{ order.pickup_date|date:"d/m/Y" }}</span>
+                </div>
+                <div class="summary-row">
+                    <span class="label">Total:</span>
+                    <span class="value price">{{ order.total_amount }} €</span>
+                </div>
+            </div>
+            
+            <div class="warning-text">
+                <p><strong>Attention:</strong> Cette action est irréversible. Le montant de votre commande ne sera pas débité.</p>
+            </div>
+            
+            <div class="confirm-actions">
+                <form method="post" action="{% url 'cancel_order' order.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Oui, annuler cette commande</button>
+                </form>
+                <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-secondary">Non, revenir à ma commande</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

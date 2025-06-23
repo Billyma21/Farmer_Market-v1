@@ -1,0 +1,581 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Commande #{{ order.id }} - Farmer Market{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .order-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .order-title h1 {
+        margin: 0;
+        font-size: 1.8rem;
+        color: #333;
+    }
+    
+    .order-date {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .order-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 5px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: #61892F;
+        color: white;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: #507526;
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+    }
+    
+    .btn-outline:hover {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border: none;
+    }
+    
+    .btn-danger:hover {
+        background: #c82333;
+    }
+    
+    .order-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+    }
+    
+    .order-details {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    
+    .panel-heading {
+        padding: 1.25rem;
+        background: #f9f9f9;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .panel-title {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+    
+    .panel-body {
+        padding: 1.25rem;
+    }
+    
+    .order-items {
+        margin-bottom: 1.5rem;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .order-item:last-child {
+        border-bottom: none;
+    }
+    
+    .item-details {
+        display: flex;
+        align-items: center;
+    }
+    
+    .item-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-right: 1rem;
+    }
+    
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .item-info {
+        flex: 1;
+    }
+    
+    .item-name {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .item-price {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .item-quantity {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .item-total {
+        font-weight: 600;
+        color: #61892F;
+    }
+    
+    .order-summary {
+        margin-top: 1.5rem;
+        border-top: 1px solid #eee;
+        padding-top: 1.5rem;
+    }
+    
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-label {
+        color: #666;
+    }
+    
+    .summary-value {
+        font-weight: 600;
+    }
+    
+    .summary-total {
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid #eee;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+    
+    .summary-total .summary-value {
+        color: #61892F;
+    }
+    
+    .order-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .order-status, .order-payment, .order-pickup, .order-notes {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-pending {
+        background-color: #ffeeba;
+        color: #856404;
+    }
+    
+    .status-confirmed {
+        background-color: #b8daff;
+        color: #004085;
+    }
+    
+    .status-ready {
+        background-color: #c3e6cb;
+        color: #155724;
+    }
+    
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .payment-status {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+    
+    .payment-status.paid {
+        color: #155724;
+    }
+    
+    .payment-status.unpaid {
+        color: #856404;
+    }
+    
+    .payment-status i {
+        margin-right: 0.5rem;
+    }
+    
+    .info-group {
+        margin-bottom: 1rem;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #333;
+    }
+    
+    .info-value {
+        color: #666;
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+        margin-top: 1.5rem;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8px;
+        width: 2px;
+        background: #e0e0e0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .timeline-icon {
+        position: absolute;
+        left: -2rem;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        border: 2px solid white;
+        z-index: 1;
+    }
+    
+    .timeline-item.active .timeline-icon {
+        background: #61892F;
+    }
+    
+    .timeline-content {
+        padding-bottom: 0.5rem;
+    }
+    
+    .timeline-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #333;
+    }
+    
+    .timeline-date {
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .order-content {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .order-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .order-actions {
+            margin-top: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-container">
+    <div class="order-header">
+        <div class="order-title">
+            <h1>Commande #{{ order.id }}</h1>
+            <div class="order-date">Passée le {{ order.created_at|date:"d/m/Y à H:i" }}</div>
+        </div>
+        
+        <div class="order-actions">
+            <a href="#" class="btn btn-outline" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimer
+            </a>
+            <a href="{% url 'download_invoice' order.id %}" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Télécharger la facture
+            </a>
+            {% if order.status == 'pending' or order.status == 'confirmed' %}
+                <a href="{% url 'cancel_order' order.id %}" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="order-content">
+        <div class="order-details">
+            <div class="panel-heading">
+                <h2 class="panel-title">Détails de la commande</h2>
+            </div>
+            <div class="panel-body">
+                <div class="order-items">
+                    {% for item in order.items.all %}
+                    <div class="order-item">
+                        <div class="item-details">
+                            <div class="item-image">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ item.product.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name">{{ item.product.name }}</div>
+                                <div class="item-price">{{ item.price }} € x {{ item.quantity }}</div>
+                            </div>
+                        </div>
+                        <div class="item-total">{{ item.get_cost }} €</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="order-summary">
+                    <div class="summary-row">
+                        <div class="summary-label">Sous-total</div>
+                        <div class="summary-value">{{ order.total_amount }} €</div>
+                    </div>
+                    <div class="summary-row">
+                        <div class="summary-label">Frais de service</div>
+                        <div class="summary-value">0,00 €</div>
+                    </div>
+                    <div class="summary-row summary-total">
+                        <div class="summary-label">Total</div>
+                        <div class="summary-value">{{ order.total_amount }} €</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="order-sidebar">
+            <div class="order-status">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Statut</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="status-badge status-{{ order.status }}">
+                        {% if order.status == 'pending' %}
+                            En attente
+                        {% elif order.status == 'confirmed' %}
+                            Confirmée
+                        {% elif order.status == 'ready' %}
+                            Prête à être récupérée
+                        {% elif order.status == 'completed' %}
+                            Terminée
+                        {% elif order.status == 'cancelled' %}
+                            Annulée
+                        {% endif %}
+                    </div>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item active">
+                            <div class="timeline-icon"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Commande passée</div>
+                                <div class="timeline-date">{{ order.created_at|date:"d/m/Y à H:i" }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {% if order.status == 'confirmed' or order.status == 'ready' or order.status == 'completed' %}active{% endif %}">
+                            <div class="timeline-icon"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Commande confirmée</div>
+                                {% if order.status == 'confirmed' or order.status == 'ready' or order.status == 'completed' %}
+                                    <div class="timeline-date">{{ order.updated_at|date:"d/m/Y à H:i" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {% if order.status == 'ready' or order.status == 'completed' %}active{% endif %}">
+                            <div class="timeline-icon"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Prête à être récupérée</div>
+                                {% if order.status == 'ready' or order.status == 'completed' %}
+                                    <div class="timeline-date">{{ order.updated_at|date:"d/m/Y à H:i" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {% if order.status == 'completed' %}active{% endif %}">
+                            <div class="timeline-icon"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">Commande terminée</div>
+                                {% if order.status == 'completed' %}
+                                    <div class="timeline-date">{{ order.completed_at|date:"d/m/Y à H:i" }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-payment">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Paiement</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="info-group">
+                        <div class="info-label">Méthode de paiement</div>
+                        <div class="info-value">
+                            {% if order.payment_method == 'card' %}
+                                <i class="fas fa-credit-card"></i> Carte bancaire
+                            {% elif order.payment_method == 'transfer' %}
+                                <i class="fas fa-university"></i> Virement bancaire
+                            {% else %}
+                                <i class="fas fa-money-bill-wave"></i> Paiement sur place
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Statut du paiement</div>
+                        {% if order.payment_status == 'paid' %}
+                            <div class="payment-status paid">
+                                <i class="fas fa-check-circle"></i> Payé le {{ order.payment_date|date:"d/m/Y" }}
+                            </div>
+                        {% else %}
+                            <div class="payment-status unpaid">
+                                <i class="fas fa-clock"></i> En attente de paiement
+                            </div>
+                            {% if order.payment_method != 'onsite' and order.status != 'cancelled' %}
+                                <a href="{% url 'payment_options' order.id %}" class="btn btn-primary" style="margin-top: 1rem; display: inline-block;">
+                                    <i class="fas fa-credit-card"></i> Payer maintenant
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-pickup">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Informations de retrait</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="info-group">
+                        <div class="info-label">Date de retrait</div>
+                        <div class="info-value">{{ order.pickup_date|date:"l d F Y" }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Créneau horaire</div>
+                        <div class="info-value">{{ order.pickup_time_slot }}</div>
+                    </div>
+                    
+                    <div class="info-group">
+                        <div class="info-label">Adresse</div>
+                        <div class="info-value">
+                            {% with farmer=order.items.first.product.farmer %}
+                                <p>{{ farmer.user.username }}</p>
+                                <p>{{ farmer.address }}</p>
+                                <p>{{ farmer.postal_code }} {{ farmer.city }}</p>
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if order.notes %}
+            <div class="order-notes">
+                <div class="panel-heading">
+                    <h2 class="panel-title">Notes</h2>
+                </div>
+                <div class="panel-body">
+                    <p>{{ order.notes }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Scripts spécifiques à la page de détail de commande
+    });
+</script>
+{% endblock %} 

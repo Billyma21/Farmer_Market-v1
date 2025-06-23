@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Commande #{{ order.id }} - Tableau de bord fermier{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-menu {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .dashboard-menu .nav-link {
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        color: #495057;
+    }
+    .dashboard-menu .nav-link:hover,
+    .dashboard-menu .nav-link.active {
+        background-color: #e9ecef;
+        color: #212529;
+    }
+    .dashboard-menu .nav-link i {
+        width: 20px;
+        text-align: center;
+        margin-right: 8px;
+    }
+    .order-info-card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    .order-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+    }
+    .order-badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 20px;
+    }
+    .order-body {
+        padding: 20px;
+    }
+    .order-footer {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+    }
+    .customer-info {
+        border-left: 4px solid #61892F;
+        padding-left: 15px;
+    }
+    .pickup-info {
+        border-left: 4px solid #20c997;
+        padding-left: 15px;
+    }
+    .product-img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+    .status-timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #dee2e6;
+    }
+    .status-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    .status-item::before {
+        content: '';
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #fff;
+        border: 2px solid #dee2e6;
+    }
+    .status-item.completed::before {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    .status-item.active::before {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .modal-full {
+        min-width: 90%;
+    }
+    .product-card {
+        transition: transform 0.2s;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row">
+        <!-- Menu latéral de navigation -->
+        <div class="col-md-3 mb-4">
+            <div class="dashboard-menu shadow-sm">
+                <h5 class="mb-3">Menu Fermier</h5>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{% url 'farmer_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                    </a>
+                    <a class="nav-link" href="{% url 'sales_report' %}">
+                        <i class="fas fa-chart-line"></i> Rapports de vente
+                    </a>
+                    <a class="nav-link active" href="{% url 'manage_orders' %}">
+                        <i class="fas fa-shopping-cart"></i> Gestion des commandes
+                    </a>
+                    <a class="nav-link" href="{% url 'manage_time_slots' %}">
+                        <i class="fas fa-calendar-alt"></i> Créneaux horaires
+                    </a>
+                    <a class="nav-link" href="{% url 'pickup_calendar' %}">
+                        <i class="fas fa-calendar-check"></i> Calendrier de retraits
+                    </a>
+                    <a class="nav-link" href="{% url 'manage_products' %}">
+                        <i class="fas fa-boxes"></i> Gestion des produits
+                    </a>
+                    <a class="nav-link" href="{% url 'manage_reviews' %}">
+                        <i class="fas fa-star"></i> Avis clients
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <!-- Barre de navigation et titre -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'farmer_dashboard' %}">Tableau de bord</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'manage_orders' %}">Commandes</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Commande #{{ order.id }}</li>
+                    </ol>
+                </nav>
+                <div class="btn-group">
+                    <a href="{% url 'manage_orders' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Messages d'alerte -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Informations principales de la commande -->
+            <div class="order-info-card">
+                <div class="order-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Commande #{{ order.id }}</h4>
+                    <div>
+                        <span class="badge order-badge 
+                            {% if order.status == 'pending' %}bg-warning
+                            {% elif order.status == 'confirmed' %}bg-info
+                            {% elif order.status == 'ready' %}bg-success
+                            {% elif order.status == 'completed' %}bg-primary
+                            {% else %}bg-danger{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                        <span class="badge order-badge 
+                            {% if order.payment_status == 'paid' %}bg-success
+                            {% elif order.payment_status == 'processing' %}bg-info
+                            {% elif order.payment_status == 'refunded' %}bg-secondary
+                            {% else %}bg-danger{% endif %}">
+                            {{ order.get_payment_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="order-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="customer-info mb-4">
+                                <h5>Informations client</h5>
+                                <p class="mb-1"><strong>Client:</strong> {{ order.customer.username }}</p>
+                                <p class="mb-1"><strong>Email:</strong> {{ order.customer.email }}</p>
+                                <p class="mb-1"><strong>Date de commande:</strong> {{ order.created_at|date:"d/m/Y H:i" }}</p>
+                                <p class="mb-0"><strong>Référence:</strong> {{ order.reference_number|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="pickup-info mb-4">
+                                <h5>Informations de retrait</h5>
+                                {% if pickup %}
+                                    <p class="mb-1"><strong>Date:</strong> {{ pickup.pickup_date|date:"d/m/Y" }}</p>
+                                    <p class="mb-1"><strong>Créneau:</strong> {{ pickup.availability_slot.start_time|time:"H:i" }} - {{ pickup.availability_slot.end_time|time:"H:i" }}</p>
+                                    <p class="mb-0"><strong>Lieu:</strong> {{ pickup.availability_slot.location }}</p>
+                                {% else %}
+                                    <p class="text-muted">Aucun rendez-vous de retrait programmé</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="payment-info mb-4">
+                                <h5>Paiement</h5>
+                                <p class="mb-1"><strong>Méthode:</strong> {{ order.get_payment_method_display|default:"Non spécifié" }}</p>
+                                <p class="mb-1"><strong>Statut:</strong> {{ order.get_payment_status_display }}</p>
+                                <p class="mb-1"><strong>Date:</strong> {{ order.payment_date|date:"d/m/Y H:i"|default:"N/A" }}</p>
+                                <p class="mb-0"><strong>Total:</strong> <span class="fw-bold">{{ order.total_amount }} €</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    {% if order.notes %}
+                        <div class="notes-info mb-4">
+                            <h5>Notes</h5>
+                            <div class="alert alert-light">
+                                {{ order.notes }}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Liste des produits (concernant ce fermier) -->
+                    <div class="products-info">
+                        <h5>Produits ({{ order_items.count }})</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 80px;">Image</th>
+                                        <th>Produit</th>
+                                        <th class="text-center">Prix</th>
+                                        <th class="text-center">Quantité</th>
+                                        <th class="text-end">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order_items %}
+                                        <tr>
+                                            <td>
+                                                {% if item.product.image %}
+                                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-img">
+                                                {% else %}
+                                                    <div class="product-img bg-light d-flex justify-content-center align-items-center">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'product_detail' item.product.id %}" class="fw-bold text-decoration-none">{{ item.product.name }}</a>
+                                                {% if item.product.is_organic %}<span class="badge bg-success ms-2">Bio</span>{% endif %}
+                                            </td>
+                                            <td class="text-center">{{ item.price }} €</td>
+                                            <td class="text-center">{{ item.quantity }}</td>
+                                            <td class="text-end fw-bold">{{ item.get_cost }} €</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <td colspan="4" class="text-end fw-bold">Total (vos produits):</td>
+                                        <td class="text-end fw-bold">{{ order_items_total }} €</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline de statut -->
+                    <div class="status-timeline mt-5">
+                        <h5 class="mb-4">Suivi de la commande</h5>
+                        
+                        <div class="status-item {% if order.status == 'pending' or order.status == 'confirmed' or order.status == 'ready' or order.status == 'completed' %}completed{% endif %} {% if order.status == 'pending' %}active{% endif %}">
+                            <h6>Commande reçue</h6>
+                            <p class="text-muted">{{ order.created_at|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        
+                        <div class="status-item {% if order.status == 'confirmed' or order.status == 'ready' or order.status == 'completed' %}completed{% endif %} {% if order.status == 'confirmed' %}active{% endif %}">
+                            <h6>Commande confirmée</h6>
+                            {% if order.status == 'pending' %}
+                                <a href="{% url 'update_order_status' order.id %}?status=confirmed&redirect_to=detail" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-check"></i> Confirmer maintenant
+                                </a>
+                            {% else %}
+                                <p class="text-muted">La commande a été confirmée</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="status-item {% if order.status == 'ready' or order.status == 'completed' %}completed{% endif %} {% if order.status == 'ready' %}active{% endif %}">
+                            <h6>Commande prête à être récupérée</h6>
+                            {% if order.status == 'confirmed' %}
+                                <a href="{% url 'update_order_status' order.id %}?status=ready&redirect_to=detail" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-box"></i> Marquer comme prête
+                                </a>
+                            {% elif order.status == 'ready' or order.status == 'completed' %}
+                                <p class="text-muted">La commande est prête pour la récupération</p>
+                            {% else %}
+                                <p class="text-muted">En attente de confirmation</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="status-item {% if order.status == 'completed' %}completed{% endif %} {% if order.status == 'completed' %}active{% endif %}">
+                            <h6>Commande récupérée et terminée</h6>
+                            {% if order.status == 'ready' %}
+                                <a href="{% url 'update_order_status' order.id %}?status=completed&redirect_to=detail" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-check-double"></i> Marquer comme terminée
+                                </a>
+                            {% elif order.status == 'completed' %}
+                                <p class="text-muted">La commande a été récupérée par le client</p>
+                            {% else %}
+                                <p class="text-muted">En attente de préparation</p>
+                            {% endif %}
+                        </div>
+                        
+                        {% if order.status == 'cancelled' %}
+                            <div class="status-item completed active">
+                                <h6>Commande annulée</h6>
+                                <p class="text-muted">La commande a été annulée</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="order-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">Dernière mise à jour: {{ order.updated_at|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="btn-group">
+                            {% if order.status != 'cancelled' and order.status != 'completed' %}
+                                <a href="{% url 'update_order_status' order.id %}?status=cancelled&redirect_to=detail" class="btn btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
+                                    <i class="fas fa-times"></i> Annuler la commande
+                                </a>
+                            {% endif %}
+                            
+                            {% if pickup %}
+                                <a href="#" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#pickupModal">
+                                    <i class="fas fa-calendar-check"></i> Détails du retrait
+                                </a>
+                            {% else %}
+                                <a href="{% url 'schedule_pickup' order.id %}" class="btn btn-outline-success">
+                                    <i class="fas fa-calendar-plus"></i> Programmer un retrait
+                                </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'manage_orders' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-list"></i> Voir toutes les commandes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les détails du retrait -->
+{% if pickup %}
+<div class="modal fade" id="pickupModal" tabindex="-1" aria-labelledby="pickupModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pickupModalLabel">Détails du retrait</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6>Date</h6>
+                    <p class="mb-0 fw-bold">{{ pickup.pickup_date|date:"l d F Y" }}</p>
+                </div>
+                <div class="mb-3">
+                    <h6>Horaire</h6>
+                    <p class="mb-0 fw-bold">{{ pickup.availability_slot.start_time|time:"H:i" }} - {{ pickup.availability_slot.end_time|time:"H:i" }}</p>
+                </div>
+                <div class="mb-3">
+                    <h6>Lieu</h6>
+                    <p class="mb-0 fw-bold">{{ pickup.availability_slot.location }}</p>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Le client a été informé de ces détails par email.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Code JavaScript supplémentaire si nécessaire
+});
+</script>
+{% endblock %} 

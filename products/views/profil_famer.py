@@ -38,58 +38,24 @@ def farmer_profile(request, farmer_id):
 
 
 # Vue pour modifier le profil fermier
-# Vue pour modifier le profil fermier
 @login_required
 def edit_profile(request):
-    try:
-        farmer = request.user.profile
-    except FarmerProfile.DoesNotExist:
-        farmer = FarmerProfile(farmer=request.user)
-        farmer.save()
+    # Récupère ou crée le profil fermier lié à l'utilisateur
+    profile, created = FarmerProfile.objects.get_or_create(farmer=request.user)
+    from accounts.forms import UpdateProfileForm
 
     if request.method == 'POST':
-        description = request.POST.get('description', '')
-        address = request.POST.get('address', '')
-        phone_number = request.POST.get('phone_number', '')
-        latitude = request.POST.get('latitude', '')
-        longitude = request.POST.get('longitude', '')
+        form = UpdateProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            profile = form.save()
+            messages.success(request, "Votre profil a été mis à jour avec succès!")
+            return redirect('farmer_profile', farmer_id=profile.farmer.id)
+        else:
+            messages.error(request, "Veuillez corriger les erreurs dans le formulaire.")
+    else:
+        form = UpdateProfileForm(instance=profile)
 
-        if not description or not address:
-            messages.error(request, "La description et l'adresse sont requises.")
-            return redirect('edit_profile')
-
-        # Si l'adresse est fournie, rechercher les coordonnées via l'API Nominatim
-        if address and not latitude and not longitude:
-            # Ajouter un User-Agent pour respecter les règles de Nominatim
-            headers = {
-                'User-Agent': 'YourAppName/1.0 (your@email.com)'  # Remplacez par votre propre nom d'app et email
-            }
-            response = requests.get('https://nominatim.openstreetmap.org/search',
-                                    params={'q': address, 'format': 'json', 'addressdetails': 1},
-                                    headers=headers)
-            data = response.json()
-
-            if data:
-                # Récupérer latitude et longitude
-                latitude = data[0].get('lat')
-                longitude = data[0].get('lon')
-            else:
-                messages.error(request, "Adresse non trouvée.")
-                return redirect('edit_profile')
-
-        # Mise à jour du profil fermier avec les nouvelles coordonnées
-        farmer.description = description
-        farmer.address = address
-        farmer.phone_number = phone_number
-        if latitude and longitude:
-            farmer.latitude = float(latitude)
-            farmer.longitude = float(longitude)
-
-        farmer.save()
-        messages.success(request, "Votre profil a été mis à jour.")
-        return redirect('farmer_profile', farmer_id=farmer.id)
-
-    return render(request, 'profil_farmer/edit_profile.html', {'farmer': farmer})
+    return render(request, 'products/edit_profile.html', {'form': form, 'profile': profile})
 
 
 
