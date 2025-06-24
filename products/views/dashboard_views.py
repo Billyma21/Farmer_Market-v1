@@ -8,15 +8,9 @@ import json
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
 import tempfile
-from products.models.product import Product
-from products.models.models import Order, OrderItem, Review, PickupAppointment
+from products.models import Product
+from products.models import Order, OrderItem, Review, PickupAppointment
 from products.services import ReviewService, OrderService
-
-# Importer wkhtmltopdf si nécessaire
-try:
-    from wkhtmltopdf.views import PDFTemplateResponse
-except ImportError:
-    PDFTemplateResponse = None
 
 @login_required
 def farmer_dashboard(request):
@@ -309,7 +303,7 @@ def manage_products(request):
         )
     
     # Récupérer les catégories pour le filtre
-    from products.models.product import Category
+    from products.models import Category
     categories = Category.objects.all()
     
     context = {

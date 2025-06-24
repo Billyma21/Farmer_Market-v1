@@ -11,9 +11,13 @@ from django.db.models import Q, Avg, Count
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from products.models import Product, FarmerProfile, Category
-from products.models.models import Review
-from products.forms import ProductForm
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from django.db import transaction
+from products.models import Product, FarmerProfile, Category, Review
+from products.forms import ProductForm, ReviewForm
+from products.services import ReviewService
 
 def product_list(request):
     """Vue pour la liste des produits"""

@@ -3,8 +3,19 @@ import logging
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
-from products.models.models import Notification, Order, Review, AvailabilityTimeSlot, PickupAppointment
-from django.db.models import Avg, Count, F
+from django.db.models import Q, Sum, Count, Avg, F
+from products.models import Notification, Order, Review, AvailabilityTimeSlot, PickupAppointment
+
+# Imports conditionnels pour les services externes
+try:
+    import pdfkit
+except ImportError:
+    pdfkit = None
+
+try:
+    import stripe
+except ImportError:
+    stripe = None
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +196,7 @@ class OrderService:
     @staticmethod
     def check_pending_orders(time_threshold):
         """Vérifie les commandes en attente depuis trop longtemps"""
-        from products.models.models import Order
+        from products.models import Order
         
         pending_orders = Order.objects.filter(
             status='pending',
@@ -229,7 +240,7 @@ L'équipe Farmer Market""",
     @staticmethod
     def check_pickup_dates():
         """Vérifie les commandes dont la date de retrait est passée"""
-        from products.models.models import Order
+        from products.models import Order
         from django.utils import timezone
         
         # Commandes confirmées dont la date de retrait est passée
@@ -342,7 +353,8 @@ L'équipe Farmer Market"""
     def get_top_rated_products(limit=5, min_reviews=3):
         """Récupère les produits les mieux notés avec un minimum d'avis"""
         from django.db.models import Count
-        return product.Product.objects.annotate(
+        from products.models import Product
+        return Product.objects.annotate(
             avg_rating=Avg('reviews__rating'),
             review_count=Count('reviews')
         ).filter(review_count__gte=min_reviews).order_by('-avg_rating')[:limit]
@@ -451,7 +463,7 @@ class ReportService:
     @staticmethod
     def generate_sales_report(farmer, start_date, end_date):
         """Génère un rapport de ventes pour un fermier sur une période donnée"""
-        from products.models.models import OrderItem
+        from products.models import OrderItem
         from django.db.models import Sum, Count
         
         # Récupérer toutes les ventes du fermier sur la période
@@ -682,7 +694,7 @@ L'équipe Farmer Market""",
     @staticmethod
     def confirm_payment(order_id, payment_details=None):
         """Confirme le paiement d'une commande"""
-        from products.models.models import Order
+        from products.models import Order
         
         try:
             order = Order.objects.get(id=order_id)

@@ -1,5 +1,3 @@
-# products/views/map_views.py
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -106,15 +104,15 @@ def get_farmers_data(request):
             'latitude': farmer.latitude,
             'longitude': farmer.longitude,
             'description': farmer.description[:200] + '...' if len(farmer.description) > 200 else farmer.description,
-            'address': farmer.get_full_address(),
+            'address': farmer.address,
             'phone': farmer.phone_number,
             'email': farmer.email,
             'website': farmer.website,
             'is_organic': farmer.is_organic_certified,
             'product_count': product_count,
             'avg_rating': avg_rating,
-            'image_url': farmer.get_farm_image_url(),
-            'profile_url': farmer.get_absolute_url(),
+            'image_url': '/static/images/default-farm.jpg',
+            'profile_url': f'/farmer/{farmer.farmer.username}/',
         })
     
     return JsonResponse({'farmers': farmers_data})
@@ -158,15 +156,15 @@ def search_farmers(request):
             'latitude': farmer.latitude,
             'longitude': farmer.longitude,
             'description': farmer.description[:200] + '...' if len(farmer.description) > 200 else farmer.description,
-            'address': farmer.get_full_address(),
+            'address': farmer.address,
             'phone': farmer.phone_number,
             'email': farmer.email,
             'website': farmer.website,
             'is_organic': farmer.is_organic_certified,
             'product_count': product_count,
             'avg_rating': avg_rating,
-            'image_url': farmer.get_farm_image_url(),
-            'profile_url': farmer.get_absolute_url(),
+            'image_url': '/static/images/default-farm.jpg',
+            'profile_url': f'/farmer/{farmer.farmer.username}/',
         })
     
-    return JsonResponse({'farmers': farmers_data})
+    return JsonResponse({'farmers': farmers_data}) 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
+from django.db.models import Avg
 from products.models import Product, Category, Order, OrderItem, FarmerProfile
-from products.models.models import Review
+from products.models import Review
 from accounts.models import User
 
 class CategorySerializer(serializers.ModelSerializer):

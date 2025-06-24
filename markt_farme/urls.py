@@ -12,7 +12,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
     path('api/', include('products.api.urls')),  # API RESTful
-    path('api/set-language/', set_language, name='set_language'),  # Changement de langue
 ]
 
 # URLs avec support multilingue
@@ -20,6 +19,7 @@ urlpatterns += i18n_patterns(
     path('', include('products.urls')),
     path('accounts/', include('accounts.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('api/set-language/', set_language, name='set_language'),  # Changement de langue
     prefix_default_language=False,  # Permet /fr/, /en/, /nl/ mais pas /fr/ pour la langue par défaut
 )
 

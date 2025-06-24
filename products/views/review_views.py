@@ -5,8 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import JsonResponse
-from products.models.product import Product
-from products.models.models import Review, Order, OrderItem
+from products.models import Product
+from products.models import Review, Order, OrderItem
 from products.forms import ReviewForm
 
 @login_required

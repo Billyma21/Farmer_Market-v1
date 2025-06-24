@@ -55,9 +55,68 @@ class LoginForm(forms.Form):
 # Profile du vendeur pour la map
 
 from django import forms
-from products.models import FarmerProfile
+from products.models.farmeProfile import FarmerProfile
 
 class UpdateProfileForm(forms.ModelForm):
     class Meta:
         model = FarmerProfile
-        fields = ['description', 'address', 'phone_number', 'website', 'latitude', 'longitude']
+        fields = [
+            'farm_name', 'description', 'street', 'city', 'zip_code', 'country',
+            'location_instructions', 'phone_number', 'email', 'website', 'facebook',
+            'instagram', 'twitter', 'agriculture_sector', 'services',
+            'opening_hours', 'is_organic_certified', 'certification_details',
+            'can_deliver', 'delivery_area', 'delivery_conditions', 'specialties',
+            'seasonal_products', 'production_methods', 'farm_image', 'latitude', 'longitude'
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Décrivez votre ferme...'}),
+            'street': forms.TextInput(attrs={'placeholder': 'Rue et numéro'}),
+            'city': forms.TextInput(attrs={'placeholder': 'Ville'}),
+            'zip_code': forms.TextInput(attrs={'placeholder': 'Code postal'}),
+            'country': forms.TextInput(attrs={'placeholder': 'Pays', 'value': 'Belgique'}),
+            'location_instructions': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Instructions pour trouver la ferme...'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': '+32 xxx xx xx xx'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'contact@exemple.com'}),
+            'website': forms.URLInput(attrs={'placeholder': 'https://www.votresite.com'}),
+            'facebook': forms.URLInput(attrs={'placeholder': 'https://www.facebook.com/votrepage'}),
+            'instagram': forms.URLInput(attrs={'placeholder': 'https://www.instagram.com/votrepage'}),
+            'twitter': forms.URLInput(attrs={'placeholder': 'https://twitter.com/votrepage'}),
+            'agriculture_sector': forms.TextInput(attrs={'placeholder': 'Ex: Maraîchage, Élevage, Arboriculture...'}),
+            'services': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Services proposés: vente directe, visites guidées...'}),
+            'opening_hours': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Ex: Lun-Ven 9h-18h, Sam 9h-12h'}),
+            'certification_details': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Détails des certifications (Bio, HVE, etc.)'}),
+            'delivery_area': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Zone de livraison (codes postaux, villes)'}),
+            'delivery_conditions': forms.Textarea(attrs={'rows': 2, 'placeholder': 'Conditions de livraison (minimum de commande, délais)'}),
+            'specialties': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Produits phares de votre ferme'}),
+            'seasonal_products': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Produits disponibles selon les saisons'}),
+            'production_methods': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Méthodes de production employées'}),
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+        }
+        labels = {
+            'farm_name': 'Nom de la ferme',
+            'description': 'Description',
+            'street': 'Rue et numéro',
+            'city': 'Ville',
+            'zip_code': 'Code postal',
+            'country': 'Pays',
+            'location_instructions': 'Comment trouver la ferme',
+            'phone_number': 'Téléphone',
+            'email': 'Email de contact',
+            'website': 'Site web',
+            'facebook': 'Page Facebook',
+            'instagram': 'Compte Instagram',
+            'twitter': 'Compte Twitter',
+            'agriculture_sector': 'Secteur agricole',
+            'services': 'Services proposés',
+            'opening_hours': 'Horaires d\'ouverture',
+            'is_organic_certified': 'Certifié biologique',
+            'certification_details': 'Détails des certifications',
+            'can_deliver': 'Propose des livraisons',
+            'delivery_area': 'Zone de livraison',
+            'delivery_conditions': 'Conditions de livraison',
+            'specialties': 'Spécialités',
+            'seasonal_products': 'Produits saisonniers',
+            'production_methods': 'Méthodes de production',
+            'farm_image': 'Image principale de la ferme',
+        }

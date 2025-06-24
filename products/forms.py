@@ -4,7 +4,7 @@ from django import forms
 from products.models import Product
 from django.utils import timezone
 import datetime
-from .models.models import Order, Review, AvailabilityTimeSlot, PickupAppointment
+from .models import Order, Review, AvailabilityTimeSlot, PickupAppointment
 
 class ProductForm(forms.ModelForm):
     class Meta:

@@ -8,9 +8,12 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q, Avg, Count, Sum
 from django.utils import timezone
 from datetime import timedelta
+from django.utils.translation import gettext as _
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 
 from products.models import Product, Category, Order, OrderItem, FarmerProfile
-from products.models.models import Review
+from products.models import Review
 from accounts.models import User
 from products.serializers import (
     ProductSerializer, CategorySerializer, OrderSerializer, 

@@ -1,9 +1,10 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from django.contrib.auth import get_user_model
 from products.models.product import Product, Category
-from products.models.models import Order, OrderItem, Cart, CartItem, Review, Notification
+from products.models import Order, OrderItem, Cart, CartItem, Review, Notification
 
 User = get_user_model()
 
