@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container review-container">
+    <div class="review-header">
+        <h1>Modifier votre avis sur {{ product.name }}</h1>
+        <div class="product-preview">
+            <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-image">
+            <div class="product-info">
+                <h2>{{ product.name }}</h2>
+                <p class="farmer-name">Par {{ product.farmer.username }}</p>
+            </div>
+        </div>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="review-form-container">
+        <form method="post" action="{% url 'edit_review' review.id %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.rating.id_for_label }}">{{ form.rating.label }}</label>
+                <div class="star-rating">
+                    {{ form.rating }}
+                    <div class="rating-helper">
+                        <span class="star-icon">★</span> Sélectionnez de 1 à 5 étoiles
+                    </div>
+                </div>
+                {% if form.rating.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.rating.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.title.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label>
+                {{ form.comment }}
+                {% if form.comment.errors %}
+                    <div class="invalid-feedback">
+                        {{ form.comment.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="review-actions">
+                <div class="left-actions">
+                    <a href="{% url 'delete_review' review.id %}" class="btn btn-outline-danger">Supprimer mon avis</a>
+                </div>
+                <div class="right-actions">
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-secondary">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Mettre à jour mon avis</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Style pour le sélecteur d'étoiles
+        const ratingSelect = document.getElementById('{{ form.rating.id_for_label }}');
+        if (ratingSelect) {
+            ratingSelect.classList.add('form-control');
+            
+            // Ajouter des étoiles aux options
+            Array.from(ratingSelect.options).forEach(option => {
+                if (option.value) {
+                    const stars = '★'.repeat(parseInt(option.value)) + '☆'.repeat(5 - parseInt(option.value));
+                    option.text = stars + ' ' + option.text;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

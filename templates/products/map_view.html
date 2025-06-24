@@ -1,5 +1,6 @@
 <!-- templates/products/map_view.html -->
 
+<<<<<<< HEAD
 {% extends 'base.html' %}
 
 {% block title %}Carte des Fermiers | Farmer Market{% endblock %}
@@ -350,44 +351,536 @@
         legend.addTo(map);
     });
 </script>
+=======
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Carte des Fermiers Locaux" %} - {% trans "Farmer Market" %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .map-container {
+        position: relative;
+        height: 70vh;
+        min-height: 500px;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    #farmers-map {
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+    }
+    
+    .map-controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 1000;
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        min-width: 300px;
+    }
+    
+    .search-box {
+        margin-bottom: 1rem;
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .search-box input:focus {
+        outline: none;
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .filters {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid #e9ecef;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+        background: #f8f9fa;
+        border-color: #28a745;
+    }
+    
+    .filter-btn.active {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+    
+    .farmers-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border-top: 1px solid #e9ecef;
+        padding-top: 1rem;
+    }
+    
+    .farmer-item {
+        padding: 0.75rem;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    
+    .farmer-item:hover {
+        border-color: #28a745;
+        box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1);
+    }
+    
+    .farmer-item h6 {
+        margin: 0 0 0.25rem 0;
+        color: #28a745;
+        font-weight: 600;
+    }
+    
+    .farmer-item p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .farmer-stats {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .farmer-stats span {
+        background: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        color: #666;
+    }
+    
+    .organic-badge {
+        background: #28a745;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .map-info {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .map-info h2 {
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+    
+    .map-info p {
+        color: #666;
+        line-height: 1.6;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .stat-card {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #28a745;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    
+    .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        color: #666;
+    }
+    
+    .loading i {
+        margin-right: 0.5rem;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+        .map-controls {
+            position: relative;
+            top: auto;
+            left: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .map-container {
+            height: 50vh;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+>>>>>>> V1.01
 {% endblock %}
 
-
-
-{% comment %} <!-- templates/products/map_view.html-->
-
-{% extends "base.html" %}
-
 {% block content %}
-    <h1>Carte des fermiers</h1>
-    <div id="map" style="height: 500px;"></div>
+<div class="container-fluid">
+    <!-- En-tête de la carte -->
+    <div class="map-info">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h2><i class="fas fa-map-marked-alt me-2"></i>{% trans "Carte des Fermiers Locaux" %}</h2>
+                <p class="mb-0">
+                    {% trans "Découvrez tous nos fermiers partenaires sur la carte interactive. Cliquez sur un marqueur pour voir les détails de la ferme et ses produits." %}
+                </p>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-farmers">{{ farmers.count }}</div>
+                        <div class="stat-label">{% trans "Fermiers" %}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="organic-farmers">{{ total_organic_farmers }}</div>
+                        <div class="stat-label">{% trans "Bio" %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-        // Initialiser la carte avec un centre par défaut
-        var map = L.map('map').setView([48.8566, 2.3522], 6); // Vue initiale sur Paris
+    <!-- Conteneur de la carte -->
+    <div class="map-container">
+        <div id="farmers-map"></div>
+        
+        <!-- Contrôles de la carte -->
+        <div class="map-controls">
+            <div class="search-box">
+                <input type="text" id="farmer-search" placeholder="{% trans 'Rechercher un fermier...' %}" />
+            </div>
+            
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">{% trans "Tous" %}</button>
+                <button class="filter-btn" data-filter="organic">{% trans "Bio" %}</button>
+                <button class="filter-btn" data-filter="delivery">{% trans "Livraison" %}</button>
+            </div>
+            
+            <div class="farmers-list" id="farmers-list">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    {% trans "Chargement des fermiers..." %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-        // Ajouter une couche de tuiles OpenStreetMap
+<!-- Modal pour les détails du fermier -->
+<div class="modal fade" id="farmerModal" tabindex="-1" aria-labelledby="farmerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="farmerModalLabel"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+            <div class="modal-body" id="farmerModalBody">
+                <!-- Contenu dynamique -->
+                        </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Fermer" %}</button>
+                <a href="#" class="btn btn-primary" id="farmerProfileLink">{% trans "Voir le profil" %}</a>
+                </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let map;
+    let markers = [];
+    let farmersData = [];
+    let currentFilter = 'all';
+    
+    // Initialiser la carte
+    function initMap() {
+        // Coordonnées par défaut (Belgique)
+        const defaultLat = 50.8503;
+        const defaultLng = 4.3517;
+        
+        map = L.map('farmers-map').setView([defaultLat, defaultLng], 8);
+        
+        // Ajouter la couche OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
         }).addTo(map);
-
-        // Ajouter un marqueur pour chaque fermier sur la carte
-        {% for farmer in farmers %}
-            {% if farmer.latitude and farmer.longitude %}
-                // Créer un marqueur à la latitude et longitude du fermier
-                L.marker([{{ farmer.latitude }}, {{ farmer.longitude }}])
-                    .addTo(map)
-                    .bindPopup(`
-                        <b>{{ farmer.farmer.username }}</b><br>
-                        <strong>Adresse :</strong> {{ farmer.address }}<br>
-                        <strong>Description :</strong> {{ farmer.description }}<br>
-                        <strong>Numéro de téléphone :</strong> {{ farmer.phone_number }}<br>
-                        <strong>Site Web :</strong> <a href="{{ farmer.website }}" target="_blank">{{ farmer.website }}</a><br>
-                        <strong>Services :</strong> {{ farmer.services }}<br>
-                        <strong>Horaires d'ouverture :</strong> {{ farmer.opening_hours }}
-                    `); // Afficher des infos au clic sur le marqueur
-            {% endif %}
-        {% endfor %}
-    </script>
-{% endblock %} {% endcomment %}
+        
+        // Charger les données des fermiers
+        loadFarmersData();
+    }
+    
+    // Charger les données des fermiers
+    function loadFarmersData() {
+        fetch('{% url "get_farmers_data" %}')
+            .then(response => response.json())
+            .then(data => {
+                farmersData = data.farmers;
+                displayFarmers();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Erreur lors du chargement des fermiers:', error);
+                document.getElementById('farmers-list').innerHTML = 
+                    '<div class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>{% trans "Erreur de chargement" %}</div>';
+            });
+    }
+    
+    // Afficher les fermiers sur la carte et dans la liste
+    function displayFarmers() {
+        // Nettoyer les marqueurs existants
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        // Filtrer les fermiers selon le filtre actuel
+        let filteredFarmers = farmersData;
+        if (currentFilter === 'organic') {
+            filteredFarmers = farmersData.filter(farmer => farmer.is_organic);
+        } else if (currentFilter === 'delivery') {
+            filteredFarmers = farmersData.filter(farmer => farmer.can_deliver);
+        }
+        
+        // Ajouter les marqueurs sur la carte
+        filteredFarmers.forEach(farmer => {
+            const marker = L.marker([farmer.latitude, farmer.longitude])
+                .addTo(map)
+                .bindPopup(createPopupContent(farmer));
+            
+            marker.farmerData = farmer;
+            markers.push(marker);
+            
+            // Ouvrir le modal au clic
+            marker.on('click', function() {
+                showFarmerModal(farmer);
+            });
+        });
+        
+        // Mettre à jour la liste des fermiers
+        updateFarmersList(filteredFarmers);
+        
+        // Ajuster la vue de la carte si des marqueurs existent
+        if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+    
+    // Créer le contenu du popup
+    function createPopupContent(farmer) {
+        return `
+            <div class="text-center">
+                <h6 class="mb-2">${farmer.name}</h6>
+                <p class="mb-2 small">${farmer.address}</p>
+                ${farmer.is_organic ? '<span class="badge bg-success">Bio</span>' : ''}
+                <div class="mt-2">
+                    <small>${farmer.product_count} produits</small>
+                    ${farmer.avg_rating > 0 ? `<br><small>⭐ ${farmer.avg_rating}/5</small>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Mettre à jour la liste des fermiers
+    function updateFarmersList(farmers) {
+        const listContainer = document.getElementById('farmers-list');
+        
+        if (farmers.length === 0) {
+            listContainer.innerHTML = '<div class="text-muted">{% trans "Aucun fermier trouvé" %}</div>';
+            return;
+        }
+        
+        listContainer.innerHTML = farmers.map(farmer => `
+            <div class="farmer-item" onclick="showFarmerModal(${JSON.stringify(farmer).replace(/"/g, '&quot;')})">
+                <h6>${farmer.name}</h6>
+                <p>${farmer.address}</p>
+                <div class="farmer-stats">
+                    <span>${farmer.product_count} produits</span>
+                    ${farmer.avg_rating > 0 ? `<span>⭐ ${farmer.avg_rating}/5</span>` : ''}
+                    ${farmer.is_organic ? '<span class="organic-badge">Bio</span>' : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Afficher le modal avec les détails du fermier
+    function showFarmerModal(farmer) {
+        const modal = new bootstrap.Modal(document.getElementById('farmerModal'));
+        const modalTitle = document.getElementById('farmerModalLabel');
+        const modalBody = document.getElementById('farmerModalBody');
+        const profileLink = document.getElementById('farmerProfileLink');
+        
+        modalTitle.textContent = farmer.name;
+        
+        modalBody.innerHTML = `
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="${farmer.image_url}" alt="${farmer.name}" class="img-fluid rounded" style="max-height: 200px; object-fit: cover;">
+                </div>
+                <div class="col-md-8">
+                    <h6>${farmer.farmer_name}</h6>
+                    <p class="text-muted">${farmer.description}</p>
+                    
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>{% trans "Adresse" %}:</strong><br>
+                            <small>${farmer.address}</small>
+                        </div>
+                        <div class="col-6">
+                            <strong>{% trans "Contact" %}:</strong><br>
+                            ${farmer.phone ? `<small>📞 ${farmer.phone}</small><br>` : ''}
+                            ${farmer.email ? `<small>📧 ${farmer.email}</small>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <span class="badge bg-primary me-2">${farmer.product_count} {% trans "produits" %}</span>
+                        ${farmer.avg_rating > 0 ? `<span class="badge bg-warning">⭐ ${farmer.avg_rating}/5</span>` : ''}
+                        ${farmer.is_organic ? '<span class="badge bg-success">{% trans "Certifié Bio" %}</span>' : ''}
+                    </div>
+                    
+                    ${farmer.website ? `<div class="mt-2"><a href="${farmer.website}" target="_blank" class="btn btn-sm btn-outline-primary">{% trans "Visiter le site web" %}</a></div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        profileLink.href = farmer.profile_url;
+        modal.show();
+    }
+    
+    // Mettre à jour les statistiques
+    function updateStats() {
+        document.getElementById('total-farmers').textContent = farmersData.length;
+        document.getElementById('organic-farmers').textContent = farmersData.filter(f => f.is_organic).length;
+    }
+    
+    // Recherche de fermiers
+    document.getElementById('farmer-search').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        
+        if (query.length < 2) {
+            displayFarmers();
+            return;
+        }
+        
+        const filteredFarmers = farmersData.filter(farmer => 
+            farmer.name.toLowerCase().includes(query) ||
+            farmer.farmer_name.toLowerCase().includes(query) ||
+            farmer.address.toLowerCase().includes(query) ||
+            farmer.description.toLowerCase().includes(query)
+        );
+        
+        // Appliquer le filtre actuel
+        let finalFiltered = filteredFarmers;
+        if (currentFilter === 'organic') {
+            finalFiltered = filteredFarmers.filter(farmer => farmer.is_organic);
+        } else if (currentFilter === 'delivery') {
+            finalFiltered = filteredFarmers.filter(farmer => farmer.can_deliver);
+        }
+        
+        // Mettre à jour l'affichage
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+        
+        finalFiltered.forEach(farmer => {
+            const marker = L.marker([farmer.latitude, farmer.longitude])
+                .addTo(map)
+                .bindPopup(createPopupContent(farmer));
+            
+            marker.farmerData = farmer;
+            markers.push(marker);
+            
+            marker.on('click', function() {
+                showFarmerModal(farmer);
+            });
+        });
+        
+        updateFarmersList(finalFiltered);
+    });
+    
+    // Filtres
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Retirer la classe active de tous les boutons
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            
+            // Ajouter la classe active au bouton cliqué
+            this.classList.add('active');
+            
+            // Mettre à jour le filtre
+            currentFilter = this.dataset.filter;
+            
+            // Réafficher les fermiers
+            displayFarmers();
+        });
+    });
+    
+    // Initialiser la carte
+    initMap();
+    
+    // Rendre la fonction globale pour les clics sur les éléments de la liste
+    window.showFarmerModal = showFarmerModal;
+});
+</script>
+{% endblock %}

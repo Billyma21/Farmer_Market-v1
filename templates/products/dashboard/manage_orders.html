@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des commandes - Tableau de bord fermier{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .filter-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .order-status {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 20px;
+    }
+    .order-action-btn {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+    }
+    .btn-filter {
+        border-radius: 50px;
+        font-size: 0.85rem;
+        padding: 5px 15px;
+    }
+    .filter-badge {
+        font-size: 0.75rem;
+        background-color: #e9ecef;
+        color: #495057;
+        padding: 5px 10px;
+        border-radius: 50px;
+        margin-right: 5px;
+    }
+    .filter-badge .close {
+        margin-left: 5px;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+    .order-row {
+        transition: background-color 0.2s;
+    }
+    .order-row:hover {
+        background-color: #f8f9fa;
+    }
+    .dashboard-menu {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    .dashboard-menu .nav-link {
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 5px;
+        color: #495057;
+    }
+    .dashboard-menu .nav-link:hover,
+    .dashboard-menu .nav-link.active {
+        background-color: #e9ecef;
+        color: #212529;
+    }
+    .dashboard-menu .nav-link i {
+        width: 20px;
+        text-align: center;
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row">
+        <!-- Menu latéral de navigation -->
+        <div class="col-md-3 mb-4">
+            <div class="dashboard-menu shadow-sm">
+                <h5 class="mb-3">Menu Fermier</h5>
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{% url 'farmer_dashboard' %}">
+                        <i class="fas fa-tachometer-alt"></i> Tableau de bord
+                    </a>
+                    <a class="nav-link" href="{% url 'sales_report' %}">
+                        <i class="fas fa-chart-line"></i> Rapports de vente
+                    </a>
+                    <a class="nav-link active" href="{% url 'manage_orders' %}">
+                        <i class="fas fa-shopping-cart"></i> Gestion des commandes
+                    </a>
+                    <a class="nav-link" href="{% url 'manage_time_slots' %}">
+                        <i class="fas fa-calendar-alt"></i> Créneaux horaires
+                    </a>
+                    <a class="nav-link" href="{% url 'pickup_calendar' %}">
+                        <i class="fas fa-calendar-check"></i> Calendrier de retraits
+                    </a>
+                    <a class="nav-link" href="{% url 'add_product' %}">
+                        <i class="fas fa-plus-circle"></i> Ajouter un produit
+                    </a>
+                    <a class="nav-link" href="{% url 'manage_products' %}">
+                        <i class="fas fa-boxes"></i> Gestion des produits
+                    </a>
+                    <a class="nav-link" href="{% url 'manage_reviews' %}">
+                        <i class="fas fa-star"></i> Avis clients
+                    </a>
+                    <a class="nav-link" href="{% url 'edit_profile' %}">
+                        <i class="fas fa-user-cog"></i> Paramètres du profil
+                    </a>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    {% if current_status == 'confirmed' %}
+                    Commandes à préparer
+                    {% else %}
+                    Gestion des commandes
+                    {% endif %}
+                </h2>
+                <div>
+                    <button class="btn btn-outline-primary me-2" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                        <i class="fas fa-filter"></i> Filtres
+                    </button>
+                    <div class="btn-group">
+                        <a href="{% url 'manage_orders' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-sync-alt"></i> Actualiser
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filtres actifs -->
+            {% if current_status or date_from or date_to or search %}
+            <div class="mb-3">
+                <div class="d-flex align-items-center flex-wrap">
+                    <span class="me-2">Filtres actifs:</span>
+                    {% if current_status %}
+                        <span class="filter-badge">
+                            Statut: {{ current_status|title }}
+                            <a href="{% url 'manage_orders' %}?{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search %}search={{ search }}{% endif %}" class="close text-decoration-none">&times;</a>
+                        </span>
+                    {% endif %}
+                    {% if date_from %}
+                        <span class="filter-badge">
+                            Du: {{ date_from }}
+                            <a href="{% url 'manage_orders' %}?{% if current_status %}status={{ current_status }}&{% endif %}{% if date_to %}date_to={{ date_to }}&{% endif %}{% if search %}search={{ search }}{% endif %}" class="close text-decoration-none">&times;</a>
+                        </span>
+                    {% endif %}
+                    {% if date_to %}
+                        <span class="filter-badge">
+                            Au: {{ date_to }}
+                            <a href="{% url 'manage_orders' %}?{% if current_status %}status={{ current_status }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if search %}search={{ search }}{% endif %}" class="close text-decoration-none">&times;</a>
+                        </span>
+                    {% endif %}
+                    {% if search %}
+                        <span class="filter-badge">
+                            Recherche: {{ search }}
+                            <a href="{% url 'manage_orders' %}?{% if current_status %}status={{ current_status }}&{% endif %}{% if date_from %}date_from={{ date_from }}&{% endif %}{% if date_to %}date_to={{ date_to }}{% endif %}" class="close text-decoration-none">&times;</a>
+                        </span>
+                    {% endif %}
+                    <a href="{% url 'manage_orders' %}" class="btn btn-sm btn-outline-danger ms-auto">Effacer tous les filtres</a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Section de filtrage -->
+            <div class="collapse mb-4 {% if current_status or date_from or date_to or search %}show{% endif %}" id="filterCollapse">
+                <div class="filter-section shadow-sm">
+                    <form method="get" action="{% url 'manage_orders' %}" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Statut</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">Tous les statuts</option>
+                                {% for status_code, status_label in status_choices %}
+                                    <option value="{{ status_code }}" {% if current_status == status_code %}selected{% endif %}>{{ status_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_from" class="form-label">Du</label>
+                            <input type="date" class="form-control datepicker" id="date_from" name="date_from" value="{{ date_from }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_to" class="form-label">Au</label>
+                            <input type="date" class="form-control datepicker" id="date_to" name="date_to" value="{{ date_to }}">
+                        </div>
+                        <div class="col-md-8">
+                            <label for="search" class="form-label">Recherche</label>
+                            <input type="text" class="form-control" id="search" name="search" placeholder="Numéro de commande, client, référence..." value="{{ search }}">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Rechercher
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Résultats -->
+            {% if current_status == 'confirmed' %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Ces commandes sont prêtes à être préparées pour les clients.
+            </div>
+            {% endif %}
+            
+            <!-- Tableau des commandes -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Liste des commandes ({{ orders.count }})</h5>
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'manage_orders' %}?status=pending" class="btn btn-outline-warning btn-filter">
+                                En attente
+                            </a>
+                            <a href="{% url 'manage_orders' %}?status=confirmed" class="btn btn-outline-info btn-filter">
+                                Confirmées
+                            </a>
+                            <a href="{% url 'manage_orders' %}?status=ready" class="btn btn-outline-success btn-filter">
+                                Prêtes
+                            </a>
+                            <a href="{% url 'manage_orders' %}?status=completed" class="btn btn-outline-primary btn-filter">
+                                Terminées
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if orders %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th>Paiement</th>
+                                        <th class="text-end">Montant</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in orders %}
+                                        <tr class="order-row">
+                                            <td>{{ order.id }}</td>
+                                            <td>{{ order.customer.username }}</td>
+                                            <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                <span class="badge order-status 
+                                                    {% if order.status == 'pending' %}bg-warning
+                                                    {% elif order.status == 'confirmed' %}bg-info
+                                                    {% elif order.status == 'ready' %}bg-success
+                                                    {% elif order.status == 'completed' %}bg-primary
+                                                    {% else %}bg-danger{% endif %}">
+                                                    {{ order.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge 
+                                                    {% if order.payment_status == 'paid' %}bg-success
+                                                    {% elif order.payment_status == 'processing' %}bg-info
+                                                    {% elif order.payment_status == 'refunded' %}bg-secondary
+                                                    {% else %}bg-danger{% endif %}">
+                                                    {{ order.get_payment_status_display }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">{{ order.total_amount }} €</td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a href="{% url 'order_detail' order.id %}" class="btn btn-outline-primary order-action-btn" title="Voir détails">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    {% if order.status == 'pending' %}
+                                                        <a href="{% url 'update_order_status' order.id %}?status=confirmed" class="btn btn-outline-success order-action-btn" title="Confirmer">
+                                                            <i class="fas fa-check"></i>
+                                                        </a>
+                                                    {% elif order.status == 'confirmed' %}
+                                                        <a href="{% url 'update_order_status' order.id %}?status=ready" class="btn btn-outline-info order-action-btn" title="Marquer comme prête">
+                                                            <i class="fas fa-box"></i>
+                                                        </a>
+                                                    {% elif order.status == 'ready' %}
+                                                        <a href="{% url 'update_order_status' order.id %}?status=completed" class="btn btn-outline-primary order-action-btn" title="Terminer">
+                                                            <i class="fas fa-check-double"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                    
+                                                    {% if order.status != 'cancelled' and order.status != 'completed' %}
+                                                        <a href="{% url 'update_order_status' order.id %}?status=cancelled" class="btn btn-outline-danger order-action-btn" title="Annuler" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
+                                                            <i class="fas fa-times"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+                            <p class="mb-0">Aucune commande trouvée pour les critères sélectionnés.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialisation du date picker
+        flatpickr(".datepicker", {
+            dateFormat: "Y-m-d"
+        });
+    });
+</script>
+{% endblock %} 

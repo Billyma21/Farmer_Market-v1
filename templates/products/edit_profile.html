@@ -1,0 +1,513 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %}Modifier mon profil de ferme{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map-preview {
+        height: 400px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .form-section {
+        background-color: #f9f9f9;
+        padding: 20px;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .form-section h3 {
+        color: #2c7d40;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #e3e3e3;
+        padding-bottom: 10px;
+    }
+    
+    .img-preview {
+        max-width: 100%;
+        max-height: 200px;
+        margin-top: 10px;
+        border-radius: 5px;
+    }
+    
+    .required label:after {
+        content: " *";
+        color: red;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .map-controls {
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .map-notice {
+        font-size: 0.9em;
+        color: #666;
+        margin-top: 5px;
+    }
+    
+    .toggle-section {
+        cursor: pointer;
+    }
+    
+    .toggle-icon {
+        transition: transform 0.3s;
+    }
+    
+    .rotate-icon {
+        transform: rotate(180deg);
+    }
+    
+    .hidden-section {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="text-center mb-4">Modifier mon profil de ferme</h1>
+    
+    {% if messages %}
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-10">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <form method="POST" enctype="multipart/form-data" id="profile-form">
+                {% csrf_token %}
+                
+                <!-- SECTION IDENTITÉ -->
+                <div class="form-section">
+                    <h3>
+                        <span class="toggle-section" data-target="identity-section">
+                            Identité <i class="fas fa-chevron-down toggle-icon"></i>
+                        </span>
+                    </h3>
+                    <div id="identity-section">
+                        <div class="row">
+                            <div class="col-md-6 form-group required">
+                                <label for="{{ form.farm_name.id_for_label }}">Nom de la ferme</label>
+                                {% render_field form.farm_name class="form-control" placeholder="Nom de votre ferme" %}
+                                {% if form.farm_name.errors %}
+                                <small class="text-danger">{{ form.farm_name.errors }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group required">
+                            <label for="{{ form.description.id_for_label }}">Description</label>
+                            {% render_field form.description class="form-control" placeholder="Décrivez votre ferme en quelques phrases..." %}
+                            {% if form.description.errors %}
+                            <small class="text-danger">{{ form.description.errors }}</small>
+                            {% endif %}
+                            <small class="form-text text-muted">Cette description apparaîtra sur votre page de profil et dans les résultats de recherche.</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECTION ADRESSE ET LOCALISATION -->
+                <div class="form-section">
+                    <h3>
+                        <span class="toggle-section" data-target="location-section">
+                            Adresse et localisation <i class="fas fa-chevron-down toggle-icon"></i>
+                        </span>
+                    </h3>
+                    <div id="location-section">
+                        <div class="row">
+                            <div class="col-md-12 form-group required">
+                                <label for="{{ form.street.id_for_label }}">Rue et numéro</label>
+                                {% render_field form.street class="form-control" placeholder="Rue et numéro" id="street-autocomplete" %}
+                                {% if form.street.errors %}
+                                <small class="text-danger">{{ form.street.errors }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 form-group required">
+                                <label for="{{ form.zip_code.id_for_label }}">Code postal</label>
+                                {% render_field form.zip_code class="form-control" placeholder="Code postal" %}
+                                {% if form.zip_code.errors %}
+                                <small class="text-danger">{{ form.zip_code.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 form-group required">
+                                <label for="{{ form.city.id_for_label }}">Ville</label>
+                                {% render_field form.city class="form-control" placeholder="Ville" %}
+                                {% if form.city.errors %}
+                                <small class="text-danger">{{ form.city.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label for="{{ form.country.id_for_label }}">Pays</label>
+                                {% render_field form.country class="form-control" placeholder="Pays" value="Belgique" %}
+                                {% if form.country.errors %}
+                                <small class="text-danger">{{ form.country.errors }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.location_instructions.id_for_label }}">Instructions pour trouver la ferme</label>
+                            {% render_field form.location_instructions class="form-control" placeholder="Instructions pour trouver plus facilement votre ferme..." %}
+                            {% if form.location_instructions.errors %}
+                            <small class="text-danger">{{ form.location_instructions.errors }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Champs cachés pour les coordonnées -->
+                        {% render_field form.latitude id="latitude-field" %}
+                        {% render_field form.longitude id="longitude-field" %}
+                        
+                        <div class="map-controls">
+                            <button type="button" class="btn btn-primary" id="geocode-address">
+                                <i class="fas fa-map-marker-alt"></i> Localiser mon adresse
+                            </button>
+                            <span class="ml-3 map-notice">
+                                <i class="fas fa-info-circle"></i> Vous pouvez aussi déplacer le marqueur directement sur la carte
+                            </span>
+                        </div>
+                        
+                        <!-- Carte de prévisualisation -->
+                        <div id="map-preview"></div>
+                    </div>
+                </div>
+                
+                <!-- SECTION CONTACT -->
+                <div class="form-section">
+                    <h3>
+                        <span class="toggle-section" data-target="contact-section">
+                            Informations de contact <i class="fas fa-chevron-down toggle-icon"></i>
+                        </span>
+                    </h3>
+                    <div id="contact-section">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.phone_number.id_for_label }}">Téléphone</label>
+                                {% render_field form.phone_number class="form-control" placeholder="+32 xxx xx xx xx" %}
+                                {% if form.phone_number.errors %}
+                                <small class="text-danger">{{ form.phone_number.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.email.id_for_label }}">Email de contact</label>
+                                {% render_field form.email class="form-control" placeholder="email@exemple.com" %}
+                                {% if form.email.errors %}
+                                <small class="text-danger">{{ form.email.errors }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.website.id_for_label }}">Site web</label>
+                            {% render_field form.website class="form-control" placeholder="https://www.votresite.com" %}
+                            {% if form.website.errors %}
+                            <small class="text-danger">{{ form.website.errors }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECTION ACTIVITÉ -->
+                <div class="form-section">
+                    <h3>
+                        <span class="toggle-section" data-target="activity-section">
+                            Activité et services <i class="fas fa-chevron-down toggle-icon"></i>
+                        </span>
+                    </h3>
+                    <div id="activity-section">
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.agriculture_sector.id_for_label }}">Secteur agricole</label>
+                                {% render_field form.agriculture_sector class="form-control" placeholder="Ex: Maraîchage, Élevage, Arboriculture..." %}
+                                {% if form.agriculture_sector.errors %}
+                                <small class="text-danger">{{ form.agriculture_sector.errors }}</small>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.opening_hours.id_for_label }}">Horaires d'ouverture</label>
+                                {% render_field form.opening_hours class="form-control" placeholder="Ex: Lun-Ven 9h-18h, Sam 9h-12h" %}
+                                {% if form.opening_hours.errors %}
+                                <small class="text-danger">{{ form.opening_hours.errors }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {% render_field form.is_organic_certified class="form-check-input" %}
+                                    <label class="form-check-label" for="{{ form.is_organic_certified.id_for_label }}">
+                                        Certifié biologique
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    {% render_field form.can_deliver class="form-check-input" %}
+                                    <label class="form-check-label" for="{{ form.can_deliver.id_for_label }}">
+                                        Propose des livraisons
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SECTION IMAGE -->
+                <div class="form-section">
+                    <h3>
+                        <span class="toggle-section" data-target="image-section">
+                            Image de la ferme <i class="fas fa-chevron-down toggle-icon"></i>
+                        </span>
+                    </h3>
+                    <div id="image-section">
+                        <div class="form-group">
+                            <label for="{{ form.farm_image.id_for_label }}">Image principale</label>
+                            {% render_field form.farm_image class="form-control-file" %}
+                            {% if form.farm_image.errors %}
+                            <small class="text-danger">{{ form.farm_image.errors }}</small>
+                            {% endif %}
+                            
+                            {% if profile.farm_image %}
+                            <div class="mt-2">
+                                <p>Image actuelle:</p>
+                                <img src="{{ profile.get_farm_image_url }}" alt="Image de la ferme" class="img-preview">
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-save"></i> Enregistrer les modifications
+                    </button>
+                    <a href="{% url 'farmer_profile' farmer_id=profile.farmer.id %}" class="btn btn-secondary btn-lg ml-2">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Récupération des coordonnées initiales
+        let lat = parseFloat(document.getElementById('latitude-field').value) || 50.8503;
+        let lng = parseFloat(document.getElementById('longitude-field').value) || 4.3517;
+        
+        // Initialisation de la carte
+        const map = L.map('map-preview').setView([lat, lng], 13);
+        
+        // Ajouter la couche de tuiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Créer le marqueur déplaçable
+        let marker = L.marker([lat, lng], {
+            draggable: true
+        }).addTo(map);
+        
+        // Mettre à jour les coordonnées quand le marqueur est déplacé
+        marker.on('dragend', function(event) {
+            const position = marker.getLatLng();
+            document.getElementById('latitude-field').value = position.lat.toFixed(6);
+            document.getElementById('longitude-field').value = position.lng.toFixed(6);
+        });
+        
+        // Fonction pour géocoder l'adresse
+        function geocodeAddress() {
+            const street = document.getElementById('street-autocomplete').value;
+            const city = document.querySelector('[name="city"]').value;
+            const zipCode = document.querySelector('[name="zip_code"]').value;
+            const country = document.querySelector('[name="country"]').value;
+            
+            if (!street || !city) {
+                alert('Veuillez saisir au moins la rue et la ville pour localiser votre adresse.');
+                return;
+            }
+            
+            const address = `${street}, ${zipCode || ''} ${city}, ${country || 'Belgique'}`;
+            
+            // Utiliser l'API Nominatim pour le géocodage
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        const result = data[0];
+                        lat = parseFloat(result.lat);
+                        lng = parseFloat(result.lon);
+                        
+                        // Mettre à jour les champs de coordonnées
+                        document.getElementById('latitude-field').value = lat.toFixed(6);
+                        document.getElementById('longitude-field').value = lng.toFixed(6);
+                        
+                        // Mettre à jour la carte
+                        map.setView([lat, lng], 16);
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        alert('Adresse non trouvée. Veuillez vérifier les informations saisies ou positionner manuellement le marqueur sur la carte.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur lors du géocodage:', error);
+                    alert('Une erreur est survenue lors de la recherche de l\'adresse.');
+                });
+        }
+        
+        // Écouter le clic sur le bouton de géocodage
+        document.getElementById('geocode-address').addEventListener('click', geocodeAddress);
+        
+        // Fonctionnalité pour plier/déplier les sections du formulaire
+        document.querySelectorAll('.toggle-section').forEach(function(element) {
+            element.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetSection = document.getElementById(targetId);
+                const icon = this.querySelector('.toggle-icon');
+                
+                if (targetSection.classList.contains('hidden-section')) {
+                    targetSection.classList.remove('hidden-section');
+                    icon.classList.remove('rotate-icon');
+                } else {
+                    targetSection.classList.add('hidden-section');
+                    icon.classList.add('rotate-icon');
+                }
+            });
+        });
+        
+        // Autocomplétion d'adresse avec l'API Photon d'OpenStreetMap
+        const streetInput = document.getElementById('street-autocomplete');
+        let autocompleteResults = document.createElement('div');
+        autocompleteResults.className = 'autocomplete-results';
+        autocompleteResults.style.display = 'none';
+        autocompleteResults.style.position = 'absolute';
+        autocompleteResults.style.zIndex = '1000';
+        autocompleteResults.style.backgroundColor = 'white';
+        autocompleteResults.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        autocompleteResults.style.maxHeight = '200px';
+        autocompleteResults.style.overflowY = 'auto';
+        autocompleteResults.style.width = '100%';
+        autocompleteResults.style.borderRadius = '4px';
+        streetInput.parentNode.style.position = 'relative';
+        streetInput.parentNode.appendChild(autocompleteResults);
+        
+        let debounceTimer;
+        
+        streetInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const query = this.value.trim();
+                if (query.length < 3) {
+                    autocompleteResults.style.display = 'none';
+                    return;
+                }
+                
+                const country = document.querySelector('[name="country"]').value || 'Belgique';
+                
+                fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=fr&osm_tag=highway`)
+                    .then(response => response.json())
+                    .then(data => {
+                        autocompleteResults.innerHTML = '';
+                        if (data.features && data.features.length > 0) {
+                            data.features.forEach(feature => {
+                                const properties = feature.properties;
+                                const addressParts = [];
+                                
+                                if (properties.name) addressParts.push(properties.name);
+                                if (properties.street) addressParts.push(properties.street);
+                                if (properties.housenumber) addressParts.push(properties.housenumber);
+                                
+                                const addressText = addressParts.join(' ');
+                                if (!addressText) return;
+                                
+                                const item = document.createElement('div');
+                                item.className = 'autocomplete-item';
+                                item.style.padding = '8px 12px';
+                                item.style.cursor = 'pointer';
+                                item.style.borderBottom = '1px solid #eee';
+                                
+                                let displayText = addressText;
+                                if (properties.city) displayText += `, ${properties.city}`;
+                                if (properties.postcode) displayText += ` (${properties.postcode})`;
+                                
+                                item.textContent = displayText;
+                                
+                                item.addEventListener('mouseenter', function() {
+                                    this.style.backgroundColor = '#f0f0f0';
+                                });
+                                
+                                item.addEventListener('mouseleave', function() {
+                                    this.style.backgroundColor = 'white';
+                                });
+                                
+                                item.addEventListener('click', function() {
+                                    streetInput.value = addressText;
+                                    if (properties.postcode) {
+                                        document.querySelector('[name="zip_code"]').value = properties.postcode;
+                                    }
+                                    if (properties.city) {
+                                        document.querySelector('[name="city"]').value = properties.city;
+                                    }
+                                    
+                                    // Récupérer les coordonnées
+                                    const coords = feature.geometry.coordinates;
+                                    document.getElementById('latitude-field').value = coords[1].toFixed(6);
+                                    document.getElementById('longitude-field').value = coords[0].toFixed(6);
+                                    
+                                    // Mettre à jour la carte
+                                    map.setView([coords[1], coords[0]], 16);
+                                    marker.setLatLng([coords[1], coords[0]]);
+                                    
+                                    autocompleteResults.style.display = 'none';
+                                });
+                                
+                                autocompleteResults.appendChild(item);
+                            });
+                            
+                            autocompleteResults.style.display = 'block';
+                        } else {
+                            autocompleteResults.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de l\'autocomplétion:', error);
+                        autocompleteResults.style.display = 'none';
+                    });
+            }, 300);
+        });
+        
+        // Cacher les résultats quand on clique ailleurs
+        document.addEventListener('click', function(e) {
+            if (e.target !== streetInput && e.target !== autocompleteResults) {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %} 

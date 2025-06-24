@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Calendrier des retraits{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="text-success">Calendrier des retraits</h1>
+                <a href="{% url 'manage_time_slots' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-clock"></i> Gérer mes créneaux
+                </a>
+            </div>
+            
+            {% with date_str=today|date:"Y-m-d" %}
+            {% if request.GET.date == date_str and appointments_by_date|get:date_str %}
+            <div class="card shadow-sm mb-4 border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-calendar-day"></i> Retraits prévus aujourd'hui</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Horaire</th>
+                                    <th>Client</th>
+                                    <th>Commande #</th>
+                                    <th>Lieu</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments_by_date|get:date_str %}
+                                <tr>
+                                    <td>{{ appointment.availability_slot.start_time|time:"H:i" }} - {{ appointment.availability_slot.end_time|time:"H:i" }}</td>
+                                    <td>{{ appointment.order.customer.username }}</td>
+                                    <td>{{ appointment.order.id }}</td>
+                                    <td>{{ appointment.availability_slot.location }}</td>
+                                    <td>
+                                        <a href="{% url 'order_detail' appointment.order.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> Détails
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% elif request.GET.date == date_str and not appointments_by_date|get:date_str %}
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle"></i> Aucun retrait prévu pour aujourd'hui.
+            </div>
+            {% endif %}
+            {% endwith %}
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Ce calendrier affiche tous les rendez-vous de retrait planifiés pour les 30 prochains jours.
+                    </div>
+                    
+                    <div class="calendar">
+                        <div class="calendar-header">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>{{ start_date|date:"F Y" }}</h5>
+                                <div>
+                                    <a href="?month={{ prev_month }}" class="btn btn-sm btn-outline-secondary me-2">
+                                        <i class="fas fa-chevron-left"></i> Mois précédent
+                                    </a>
+                                    <a href="?month={{ next_month }}" class="btn btn-sm btn-outline-secondary">
+                                        Mois suivant <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="calendar-days-header">
+                                <div class="calendar-day-name">Lun</div>
+                                <div class="calendar-day-name">Mar</div>
+                                <div class="calendar-day-name">Mer</div>
+                                <div class="calendar-day-name">Jeu</div>
+                                <div class="calendar-day-name">Ven</div>
+                                <div class="calendar-day-name">Sam</div>
+                                <div class="calendar-day-name">Dim</div>
+                            </div>
+                        </div>
+                        
+                        <div class="calendar-grid">
+                            {% with start_weekday=start_date.weekday %}
+                                {% for i in "x"|ljust:start_weekday %}
+                                    <div class="calendar-day empty"></div>
+                                {% endfor %}
+                                
+                                {% for day_offset in "x"|ljust:30 %}
+                                    {% with current_date=start_date|date_offset:forloop.counter0 %}
+                                        <div class="calendar-day {% if current_date == today %}today{% endif %}">
+                                            <div class="calendar-day-header">
+                                                {{ current_date|date:"d/m" }}
+                                            </div>
+                                            <div class="calendar-day-appointments">
+                                                {% with date_str=current_date|date:"Y-m-d" %}
+                                                    {% if appointments_by_date|get:date_str %}
+                                                        {% for appointment in appointments_by_date|get:date_str %}
+                                                            <div class="appointment">
+                                                                <small class="text-muted">{{ appointment.availability_slot.start_time|time:"H:i" }} - {{ appointment.availability_slot.end_time|time:"H:i" }}</small>
+                                                                <span class="appointment-customer">{{ appointment.order.customer.username }}</span>
+                                                                <a href="{% url 'order_detail' appointment.order.id %}" class="btn btn-sm btn-outline-info mt-1">
+                                                                    <i class="fas fa-eye"></i> Voir commande
+                                                                </a>
+                                                            </div>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <div class="no-appointments">
+                                                            <small class="text-muted">Aucun rendez-vous</small>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endwith %}
+                                            </div>
+                                        </div>
+                                    {% endwith %}
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Légende -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Légende</h5>
+                    <div class="d-flex flex-wrap align-items-center">
+                        <div class="me-4 mb-2">
+                            <div class="calendar-day-sample today"></div>
+                            <span>Aujourd'hui</span>
+                        </div>
+                        <div class="me-4 mb-2">
+                            <div class="calendar-day-sample"></div>
+                            <span>Autre jour</span>
+                        </div>
+                        <div class="me-4 mb-2">
+                            <div class="appointment-sample"></div>
+                            <span>Rendez-vous</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .calendar {
+        width: 100%;
+    }
+    
+    .calendar-days-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .calendar-day-name {
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        margin-top: 5px;
+    }
+    
+    .calendar-day {
+        min-height: 120px;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 5px;
+    }
+    
+    .calendar-day.empty {
+        background-color: #f8f9fa;
+        border: 1px dashed #e9ecef;
+    }
+    
+    .calendar-day.today {
+        border: 2px solid #28a745;
+        background-color: #e8f5e9;
+    }
+    
+    .calendar-day-header {
+        text-align: right;
+        font-weight: bold;
+        color: #495057;
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .calendar-day-appointments {
+        font-size: 0.8rem;
+    }
+    
+    .appointment {
+        background-color: #e3f2fd;
+        border-left: 3px solid #2196f3;
+        padding: 5px;
+        margin-bottom: 5px;
+        border-radius: 3px;
+    }
+    
+    .appointment-customer {
+        display: block;
+        font-weight: bold;
+        margin: 2px 0;
+    }
+    
+    .no-appointments {
+        text-align: center;
+        color: #adb5bd;
+        padding: 10px 0;
+    }
+    
+    .calendar-day-sample {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        margin-right: 5px;
+    }
+    
+    .calendar-day-sample.today {
+        border: 2px solid #28a745;
+        background-color: #e8f5e9;
+    }
+    
+    .appointment-sample {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        background-color: #e3f2fd;
+        border-left: 3px solid #2196f3;
+        border-radius: 3px;
+        margin-right: 5px;
+    }
+</style>
+{% endblock %} 

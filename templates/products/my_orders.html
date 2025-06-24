@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-orders-container">
+    <h1 class="page-title">Mes Commandes</h1>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if orders %}
+        <div class="orders-list">
+            <div class="order-filter">
+                <button class="filter-btn active" data-filter="all">Toutes</button>
+                <button class="filter-btn" data-filter="pending">En attente</button>
+                <button class="filter-btn" data-filter="confirmed">Confirmées</button>
+                <button class="filter-btn" data-filter="ready">Prêtes</button>
+                <button class="filter-btn" data-filter="completed">Terminées</button>
+                <button class="filter-btn" data-filter="cancelled">Annulées</button>
+            </div>
+            
+            <div class="orders-table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>N° Commande</th>
+                            <th>Date</th>
+                            <th>Date de retrait</th>
+                            <th>Statut</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr class="order-row" data-status="{{ order.status }}">
+                            <td class="order-number">#{{ order.id }}</td>
+                            <td class="order-date">{{ order.created_at|date:"d/m/Y" }}</td>
+                            <td class="pickup-date">{{ order.pickup_date|date:"d/m/Y" }}</td>
+                            <td class="order-status">
+                                <span class="status-badge status-{{ order.status }}">
+                                    {% if order.status == 'pending' %}
+                                        En attente
+                                    {% elif order.status == 'confirmed' %}
+                                        Confirmée
+                                    {% elif order.status == 'ready' %}
+                                        Prête à être récupérée
+                                    {% elif order.status == 'completed' %}
+                                        Terminée
+                                    {% elif order.status == 'cancelled' %}
+                                        Annulée
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="order-total">{{ order.total_amount }} €</td>
+                            <td class="order-actions">
+                                <a href="{% url 'order_detail' order.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                                {% if order.status == 'pending' %}
+                                <a href="{% url 'cancel_order' order.id %}" class="btn btn-danger btn-sm" 
+                                   onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                    <i class="fas fa-times"></i> Annuler
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-orders">
+            <i class="fas fa-shopping-basket empty-orders-icon"></i>
+            <p>Vous n'avez pas encore passé de commande</p>
+            <a href="{% url 'home' %}" class="btn btn-primary">Découvrir nos produits</a>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filtrage des commandes
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const orderRows = document.querySelectorAll('.order-row');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Activer le bouton cliqué
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                
+                // Filtrer les commandes
+                orderRows.forEach(row => {
+                    if (filter === 'all' || row.dataset.status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %} 

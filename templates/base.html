@@ -1,26 +1,124 @@
 <!-- templates/base.html -->
 {% load static %}
+{% load i18n %}
 
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farmer Market</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <meta name="description" content="{% trans 'Farmer Market - Plateforme de vente directe de produits fermiers locaux' %}">
+    <meta name="keywords" content="{% trans 'produits fermiers, vente directe, agriculture locale, bio, circuit court' %}">
+    <meta name="author" content="Farmer Market">
+    
+    <!-- Preload des ressources critiques -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" as="style">
+    <link rel="preload" href="{% static 'css/navbar-enhanced.css' %}" as="style">
+    
+    <!-- CSS critiques -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link href="{% static 'css/navbar-enhanced.css' %}" rel="stylesheet">
+    <link href="{% static 'css/flags.css' %}" rel="stylesheet">
+    <link href="{% static 'css/components.css' %}" rel="stylesheet">
+    
+    <!-- CSS spécifiques aux pages -->
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#28a745">
+    
+    <title>{% block title %}Farmer Market{% endblock %}</title>
+    
+    <!-- Meta tags pour les réseaux sociaux -->
+    <meta property="og:title" content="{% block og_title %}Farmer Market{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{% trans 'Plateforme de vente directe de produits fermiers locaux' %}{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'images/og-image.jpg' %}{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
-
-<!-- Inclure la navbar -->
+    <!-- Navbar -->
 {% include 'includes/navbar.html' %}
+    
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
 <!-- Contenu principal -->
-<main>
-    {% block content %}{% endblock %}
+<main class="main-content">
+        {% block content %}{% endblock %}
 </main>
 
-<!-- Inclure le footer -->
-{% include 'includes/footer.html' %}
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>{% trans 'Farmer Market' %}</h5>
+                    <p class="text-muted">{% trans 'Vente directe de produits fermiers locaux' %}</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>{% trans 'Liens utiles' %}</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}" class="text-muted">{% trans 'Accueil' %}</a></li>
+                        <li><a href="{% url 'product_list' %}" class="text-muted">{% trans 'Produits' %}</a></li>
+                        <li><a href="#" class="text-muted">{% trans 'À propos' %}</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>{% trans 'Contact' %}</h6>
+                    <p class="text-muted">{% trans 'Email: contact@farmermarket.com' %}</p>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="text-center">
+                <small class="text-muted">&copy; {% now "Y" %} Farmer Market. {% trans 'Tous droits réservés.' %}</small>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
+    <!-- Scripts spécifiques aux pages -->
+{% block extra_js %}{% endblock %}
+
+    <!-- Service Worker pour PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('{% static "sw.js" %}')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- Analytics et tracking (optionnel) -->
+    {% if not debug %}
+    <script>
+        // Google Analytics ou autre tracking
+        console.log('Analytics loaded');
+    </script>
+    {% endif %}
 </body>
 </html>

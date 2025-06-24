@@ -1,12 +1,351 @@
 <!-- templates/accounts/register_farmer.html -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inscription Fermier - Farmer Market{% endblock %}
 
 {% block content %}
-    <h2>S'inscrire en tant que fermier</h2>
-    <form method="POST">
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-form-container">
+            <div class="auth-header">
+                <h1>Inscription Fermier</h1>
+                <p>Créez votre compte pour vendre vos produits sur notre plateforme</p>
+            </div>
+            
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="POST" class="auth-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">S'inscrire</button>
+                
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Nom d'utilisateur</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <div class="error-message">
+                        {% for error in form.username.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">Mot de passe</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                    <div class="error-message">
+                        {% for error in form.password1.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="form-help">
+                        <ul>
+                            <li>Votre mot de passe doit contenir au moins 8 caractères.</li>
+                            <li>Votre mot de passe ne peut pas être trop similaire à vos autres informations personnelles.</li>
+                            <li>Votre mot de passe ne peut pas être entièrement numérique.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">Confirmation du mot de passe</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div class="error-message">
+                        {% for error in form.password2.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if form.non_field_errors %}
+                <div class="error-message form-wide-error">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="form-info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Après votre inscription, vous pourrez configurer votre profil de fermier avec toutes les informations nécessaires (description, adresse, photos, etc.).</p>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block">Créer mon compte fermier</button>
+                </div>
     </form>
-    <p>Vous êtes déjà inscrit ? <a href="{% url 'login' %}">Connectez-vous</a>.</p>
+            
+            <div class="auth-footer">
+                <p>Vous êtes un client ?</p>
+                <a href="{% url 'register_customer' %}" class="btn btn-outline btn-block">
+                    <i class="fas fa-user"></i> Créer un compte client
+                </a>
+                <div class="auth-login-link">
+                    <p>Déjà inscrit ? <a href="{% url 'login' %}">Connexion</a></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auth-image">
+            <img src="{% static 'images/register-farmer.jpg' %}" alt="Fermiers" onerror="this.src='https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=1976&auto=format&fit=crop'">
+            <div class="auth-image-overlay">
+                <div class="auth-image-content">
+                    <h2>Rejoignez notre communauté de fermiers</h2>
+                    <p>Vendez vos produits en circuit court et connectez-vous directement avec les consommateurs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .auth-section {
+        min-height: calc(100vh - 150px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    
+    .auth-container {
+        display: flex;
+        max-width: 1000px;
+        width: 100%;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .auth-form-container {
+        flex: 1;
+        padding: 40px;
+        max-width: 500px;
+    }
+    
+    .auth-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+    
+    .auth-header h1 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .auth-header p {
+        color: #666;
+        font-size: 1rem;
+    }
+    
+    .auth-form {
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #333;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-group input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+    }
+    
+    .form-help {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #777;
+    }
+    
+    .form-help ul {
+        padding-left: 20px;
+    }
+    
+    .form-help li {
+        margin-bottom: 5px;
+    }
+    
+    .error-message {
+        color: #e74c3c;
+        margin-top: 5px;
+        font-size: 0.85rem;
+    }
+    
+    .form-wide-error {
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: rgba(231, 76, 60, 0.1);
+        border-radius: 5px;
+    }
+    
+    .form-info-box {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: rgba(52, 152, 219, 0.1);
+        border-radius: 5px;
+        font-size: 0.9rem;
+        color: #2980b9;
+    }
+    
+    .form-info-box i {
+        margin-top: 3px;
+    }
+    
+    .messages {
+        margin-bottom: 20px;
+    }
+    
+    .message {
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .message.success {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: #27ae60;
+    }
+    
+    .message.error {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+    
+    .message.info {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+    
+    .form-actions {
+        margin-top: 30px;
+    }
+    
+    .btn-block {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .auth-footer {
+        text-align: center;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+    
+    .auth-footer p {
+        margin-bottom: 15px;
+        color: #666;
+    }
+    
+    .auth-login-link {
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .auth-login-link a {
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .auth-login-link a:hover {
+        text-decoration: underline;
+    }
+    
+    .auth-image {
+        display: none;
+        flex: 1;
+        position: relative;
+    }
+    
+    .auth-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .auth-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
+        display: flex;
+        align-items: flex-end;
+        padding: 40px;
+        color: white;
+    }
+    
+    .auth-image-content h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+    
+    .auth-image-content p {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    @media (min-width: 768px) {
+        .auth-image {
+            display: block;
+        }
+    }
+    
+    @media (max-width: 767px) {
+        .auth-container {
+            flex-direction: column;
+        }
+        
+        .auth-form-container {
+            max-width: 100%;
+        }
+    }
+</style>
 {% endblock %}

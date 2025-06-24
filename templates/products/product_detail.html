@@ -1,28 +1,859 @@
 <!-- templates/products/product_detail.html-->
 
 {% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load product_tags %}
+
+{% block title %}{{ product.name }} - {% trans 'Farmer Market' %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* Variables CSS pour la cohérence des couleurs */
+    :root {
+        --primary-color: #28a745;
+        --primary-dark: #218838;
+        --secondary-color: #ffc107;
+        --text-dark: #1a1a1a;
+        --text-medium: #333333;
+        --text-muted: #666666;
+        --text-light: #888888;
+        --border-color: #e9ecef;
+        --background-light: #f8f9fa;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+        --shadow-medium: 0 5px 20px rgba(0,0,0,0.15);
+        --border-radius: 10px;
+        --border-radius-lg: 15px;
+        --transition: all 0.3s ease;
+    }
+
+    /* Styles pour les messages d'alerte avec meilleure lisibilité */
+    .messages-container {
+        margin-bottom: 20px;
+    }
+    
+    .alert {
+        padding: 15px 20px;
+        border-radius: var(--border-radius);
+        margin-bottom: 15px;
+        position: relative;
+        font-weight: 500;
+        border: none;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-left: 4px solid var(--success-color);
+    }
+    
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border-left: 4px solid var(--warning-color);
+    }
+    
+    .alert-error, .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid var(--danger-color);
+    }
+    
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border-left: 4px solid var(--info-color);
+    }
+    
+    .btn-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        line-height: 1;
+        color: inherit;
+        opacity: 0.7;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    
+    /* Styles améliorés pour le détail produit avec meilleure lisibilité */
+    .product-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .product-detail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .product-image {
+        position: relative;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .product-image img {
+        width: 100%;
+        height: 450px;
+        object-fit: cover;
+        transition: var(--transition);
+    }
+    
+    .product-image:hover img {
+        transform: scale(1.05);
+    }
+    
+    .product-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .product-badges {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .product-badge {
+        font-size: 0.8em;
+        padding: 8px 16px;
+        border-radius: 50px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        box-shadow: var(--shadow-light);
+    }
+    
+    .badge-organic {
+        background-color: var(--success-color);
+        color: white;
+    }
+    
+    .badge-local {
+        background-color: var(--info-color);
+        color: white;
+    }
+    
+    .badge-new {
+        background-color: var(--warning-color);
+        color: var(--text-dark);
+    }
+    
+    .product-title {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    
+    .product-rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        gap: 10px;
+    }
+    
+    .rating-stars {
+        display: flex;
+        gap: 2px;
+    }
+    
+    .rating-star {
+        color: #FFD700;
+        font-size: 1.2rem;
+    }
+    
+    .empty-star {
+        color: #ddd;
+        font-size: 1.2rem;
+    }
+    
+    .half-star {
+        color: #FFD700;
+        font-size: 1.2rem;
+    }
+    
+    .rating-count {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .product-farmer {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding: 15px;
+        background-color: var(--background-light);
+        border-radius: var(--border-radius);
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+    }
+    
+    .product-farmer:hover {
+        box-shadow: var(--shadow-light);
+        transform: translateY(-2px);
+    }
+    
+    .farmer-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 15px;
+        border: 2px solid var(--border-color);
+    }
+    
+    .farmer-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .farmer-info a {
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    
+    .farmer-info a:hover {
+        color: var(--primary-dark);
+        text-decoration: underline;
+    }
+    
+    .product-details {
+        margin-bottom: 2rem;
+    }
+    
+    .product-price {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .product-unit {
+        font-size: 1rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+    
+    .product-stock {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        padding: 10px;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+    }
+    
+    .stock-available {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .stock-limited {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+    
+    .stock-out {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .product-description {
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        color: var(--text-medium);
+    }
+    
+    .product-description h4 {
+        color: var(--text-dark);
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    
+    .product-actions {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        padding: 12px 24px;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 12px 24px;
+        border-radius: var(--border-radius);
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    
+    .btn-outline:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .quantity-btn {
+        width: 40px;
+        height: 40px;
+        border: 2px solid var(--border-color);
+        background: white;
+        border-radius: var(--border-radius);
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .quantity-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .quantity-input {
+        width: 60px;
+        height: 40px;
+        text-align: center;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    
+    .quantity-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    /* Section des avis */
+    .reviews-section {
+        margin-top: 3rem;
+        background: white;
+        border-radius: var(--border-radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .reviews-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .reviews-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+    
+    .review-item {
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        background: var(--background-light);
+    }
+    
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .reviewer-name {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+    
+    .review-date {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+    
+    .review-rating {
+        display: flex;
+        gap: 2px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .review-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .review-comment {
+        color: var(--text-medium);
+        line-height: 1.5;
+    }
+    
+    /* Produits similaires */
+    .similar-products {
+        margin-top: 3rem;
+    }
+    
+    .similar-products h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    
+    .similar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .similar-product {
+        background: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-light);
+        transition: var(--transition);
+    }
+    
+    .similar-product:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .similar-product img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .similar-product-info {
+        padding: 1rem;
+    }
+    
+    .similar-product-title {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .similar-product-price {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .product-detail {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 1rem;
+        }
+        
+        .product-title {
+            font-size: 1.8rem;
+        }
+        
+        .product-actions {
+            flex-direction: column;
+        }
+        
+        .btn-primary, .btn-outline {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-    <h1>{{ product.name }}</h1>
+<div class="product-detail-container">
+    <!-- Affichage des messages -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Fermer' %}"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="product-detail">
-        <img src="{{ product.get_image_url }}" alt="{{ product.name }}" class="product-image">
+        <div class="product-image">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}">
+            {% endif %}
+        </div>
+        
         <div class="product-info">
-            <p><strong>Description :</strong> {{ product.description }}</p>
-            <p><strong>Prix :</strong> {{ product.price }}€</p>
-            <p><strong>Stock :</strong> {{ product.stock }} en stock</p>
-            <p><strong>Statut :</strong>
-                {% if product.stock > 0 %}
-                    Disponible
-                {% else %}
-                    Rupture de stock
+            <div class="product-badges">
+                {% if product.is_organic %}
+                    <span class="product-badge badge-organic">{% trans 'Bio' %}</span>
                 {% endif %}
-            </p>
-            <div class="product-actions">
-                {% if product.stock > 0 %}
-                    <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary">Ajouter au panier</a>
-                    <button type="button" class="btn btn-success">Acheter maintenant</button>
+                {% if product.is_local %}
+                    <span class="product-badge badge-local">{% trans 'Local' %}</span>
+                {% endif %}
+                {% if product.is_new %}
+                    <span class="product-badge badge-new">{% trans 'Nouveau' %}</span>
+                {% endif %}
+            </div>
+            
+            <h1 class="product-title">{{ product.name }}</h1>
+            
+            <div class="product-rating">
+                <div class="rating-stars">
+                    {% with avg_rating=product.get_average_rating %}
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating|floatformat:"0" %}
+                                <i class="fas fa-star rating-star"></i>
+                            {% elif forloop.counter <= avg_rating|add:"0.5"|floatformat:"0" %}
+                                <i class="fas fa-star-half-alt half-star"></i>
+                            {% else %}
+                                <i class="far fa-star empty-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+                <span class="rating-count">{% blocktrans count counter=product.get_review_count %}{{ counter }} avis{% plural %}{{ counter }} avis{% endblocktrans %}</span>
+            </div>
+            
+            <div class="product-farmer">
+                <div class="farmer-avatar">
+                    {% if product.farmer.profile_image %}
+                        <img src="{{ product.farmer.profile_image.url }}" alt="{{ product.farmer.user.username }}">
+                    {% else %}
+                        <i class="fas fa-user-circle fa-3x" style="color: var(--primary-color);"></i>
+                    {% endif %}
+                </div>
+                <div class="farmer-info">
+                    <p>{% trans 'Produit par' %} <a href="{% url 'farmer_profile' product.farmer.id %}">{{ product.farmer.user.first_name }} {{ product.farmer.user.last_name }}</a></p>
+                </div>
+            </div>
+            
+            <div class="product-details">
+                <div class="product-price">{{ product.price }}€ <span class="product-unit">/ {{ product.unit|default:"unité" }}</span></div>
+                
+                <div class="product-stock">
+                    {% if product.stock > 10 %}
+                        <span class="stock-available">
+                            <i class="fas fa-check-circle"></i> {% trans 'En stock' %} ({{ product.stock }} {% trans 'disponibles' %})
+                        </span>
+                    {% elif product.stock > 0 %}
+                        <span class="stock-limited">
+                            <i class="fas fa-exclamation-circle"></i> {% trans 'Stock limité' %} ({{ product.stock }} {% trans 'disponibles' %})
+                        </span>
+                    {% else %}
+                        <span class="stock-out">
+                            <i class="fas fa-times-circle"></i> {% trans 'Rupture de stock' %}
+                        </span>
+                    {% endif %}
+                </div>
+                
+                {% if user.is_authenticated and product.stock > 0 %}
+                    <form method="post" action="{% url 'add_to_cart_with_id' product.id %}">
+                        {% csrf_token %}
+                        <div class="quantity-selector">
+                            <button type="button" class="quantity-btn decrease" title="{% trans 'Diminuer' %}">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="quantity-input" id="quantity">
+                            <button type="button" class="quantity-btn increase" title="{% trans 'Augmenter' %}">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="product-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-shopping-cart"></i> {% trans 'Ajouter au panier' %}
+                            </button>
+                            <button type="button" class="btn-outline" title="{% trans 'Ajouter aux favoris' %}">
+                                <i class="far fa-heart"></i> {% trans 'Favoris' %}
+                            </button>
+                        </div>
+                    </form>
+                {% elif not user.is_authenticated %}
+                    <p>{% trans 'Connectez-vous pour commander ce produit' %}</p>
+                    <a href="{% url 'login' %}" class="btn-primary">{% trans 'Se connecter' %}</a>
                 {% endif %}
             </div>
         </div>
     </div>
+    
+    <div class="product-description">
+        <h4>{% trans 'Description' %}</h4>
+        <p>{{ product.description }}</p>
+    </div>
+    
+    <div class="reviews-section">
+        <div class="reviews-header">
+            <h3 class="reviews-title">{% trans 'Avis clients' %}</h3>
+            <div class="rating-summary">
+                <div class="rating-stars">
+                    {% for i in "12345" %}
+                        {% if forloop.counter <= product.get_average_rating|floatformat:"0" %}
+                            <i class="fas fa-star rating-star"></i>
+                        {% elif forloop.counter <= product.get_average_rating|add:"0.5"|floatformat:"0" %}
+                            <i class="fas fa-star-half-alt half-star"></i>
+                        {% else %}
+                            <i class="far fa-star empty-star"></i>
+            {% endif %}
+                    {% endfor %}
+                </div>
+                <span class="rating-count">{% blocktrans count counter=product.get_review_count %}{{ counter }} avis{% plural %}{{ counter }} avis{% endblocktrans %}</span>
+            </div>
+        </div>
+        
+        {% if user.is_authenticated %}
+            <!-- Vérifier si l'utilisateur peut laisser un avis -->
+            {% if user != product.farmer.user %}
+                {% if user_review %}
+                    <div class="alert alert-info">
+                        <p>{% trans 'Vous avez déjà laissé un avis pour ce produit.' %}</p>
+                        <a href="{% url 'edit_review' user_review.id %}" class="btn-outline">{% trans 'Modifier mon avis' %}</a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <h4>{% trans 'Laisser un avis' %}</h4>
+                        <p>{% trans 'Partagez votre expérience avec ce produit !' %}</p>
+                        <a href="{% url 'add_review' product.id %}" class="btn-primary">
+                            <i class="fas fa-star"></i> {% trans 'Donner mon avis' %}
+                        </a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-warning">
+                    <p>{% trans 'En tant que fermier, vous ne pouvez pas laisser d\'avis sur votre propre produit.' %}</p>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <p>{% trans 'Connectez-vous pour laisser un avis sur ce produit.' %}</p>
+                <a href="{% url 'login' %}?next={{ request.path }}" class="btn-primary">{% trans 'Se connecter' %}</a>
+            </div>
+        {% endif %}
+        
+        <!-- Liste des avis -->
+        {% if product.reviews.all %}
+            <div class="reviews-list">
+            {% for review in product.reviews.all %}
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="reviewer-name">{{ review.user.username }}</span>
+                        <span class="review-date">{{ review.created_at|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="review-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= review.rating %}
+                                <i class="fas fa-star rating-star"></i>
+                            {% else %}
+                                <i class="far fa-star empty-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <h4 class="review-title">{{ review.title }}</h4>
+                    <p class="review-comment">{{ review.comment }}</p>
+                    
+                    {% if user.is_authenticated and user == review.user %}
+                    <div class="review-actions">
+                        <a href="{% url 'edit_review' review.id %}" class="btn-outline">{% trans 'Modifier' %}</a>
+                        <a href="{% url 'delete_review' review.id %}" class="btn-outline" style="color: var(--danger-color); border-color: var(--danger-color);">{% trans 'Supprimer' %}</a>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                <p>{% trans 'Aucun avis pour le moment. Soyez le premier à donner votre avis !' %}</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Produits similaires -->
+    {% if similar_products %}
+    <div class="similar-products">
+        <h3>{% trans 'Produits similaires' %}</h3>
+        <div class="similar-grid">
+            {% for similar_product in similar_products %}
+            <div class="similar-product">
+                <a href="{% url 'product_detail' similar_product.id %}">
+                    <img src="{{ similar_product.get_image_url }}" alt="{{ similar_product.name }}">
+                    <div class="similar-product-info">
+                        <h4 class="similar-product-title">{{ similar_product.name }}</h4>
+                        <div class="similar-product-price">{{ similar_product.price }}€</div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestionnaire pour les boutons de quantité
+        const decreaseBtn = document.querySelector('.decrease');
+        const increaseBtn = document.querySelector('.increase');
+        const quantityInput = document.getElementById('quantity');
+        const maxStock = {{ product.stock }};
+        
+        if (decreaseBtn && increaseBtn && quantityInput) {
+            decreaseBtn.addEventListener('click', function() {
+                let currentValue = parseInt(quantityInput.value);
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                }
+            });
+            
+            increaseBtn.addEventListener('click', function() {
+                let currentValue = parseInt(quantityInput.value);
+                if (currentValue < maxStock) {
+                    quantityInput.value = currentValue + 1;
+                }
+            });
+            
+            // Validation de la quantité
+            quantityInput.addEventListener('change', function() {
+                let currentValue = parseInt(quantityInput.value);
+                if (isNaN(currentValue) || currentValue < 1) {
+                    quantityInput.value = 1;
+                } else if (currentValue > maxStock) {
+                    quantityInput.value = maxStock;
+                }
+            });
+        }
+        
+        // Fonction pour récupérer et afficher les avis à jour en AJAX
+        const refreshReviews = () => {
+            fetch(`/products/api/reviews/${productId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Mettre à jour le nombre d'avis
+                    const ratingCount = document.querySelector('.rating-count');
+                    if (ratingCount) {
+                        ratingCount.textContent = `${data.review_count} {% trans 'avis' %}`;
+                    }
+                    
+                    // Mettre à jour les étoiles en fonction de la nouvelle moyenne
+                    updateStarsDisplay(data.average_rating);
+                })
+                .catch(error => console.error('{% trans "Erreur lors du chargement des avis" %}:', error));
+        };
+        
+        // Fonction pour mettre à jour l'affichage des étoiles
+        const updateStarsDisplay = (avgRating) => {
+            const starsContainer = document.querySelector('.rating-stars');
+            if (starsContainer) {
+                starsContainer.innerHTML = '';
+                
+                for (let i = 1; i <= 5; i++) {
+                    let star = document.createElement('i');
+                    if (i <= Math.floor(avgRating)) {
+                        star.className = 'fas fa-star rating-star';
+                    } else if (i <= Math.floor(avgRating + 0.5)) {
+                        star.className = 'fas fa-star-half-alt half-star';
+                    } else {
+                        star.className = 'far fa-star empty-star';
+                    }
+                    starsContainer.appendChild(star);
+                }
+            }
+        };
+        
+        // ID du produit pour les requêtes AJAX
+        const productId = {{ product.id }};
+        
+        // Initialiser l'affichage des étoiles lors du chargement de la page
+        const avgRating = {{ product.get_average_rating|default:0 }};
+        updateStarsDisplay(avgRating);
+        
+        // Vérifier s'il y a eu un message de succès d'ajout/modification/suppression d'avis
+        // et rafraîchir les avis si nécessaire
+        const messages = document.querySelectorAll('.alert-success');
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                if (message.textContent.includes('{% trans "avis" %}')) {
+                    setTimeout(refreshReviews, 500);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
